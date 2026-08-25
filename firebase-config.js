@@ -75,20 +75,8 @@ class FirebaseAuthManager {
           }
         }
       }
-
-      // Check existing admin session
-      const localAuth = localStorage.getItem('portfolio_admin_session');
-      if (localAuth === 'authenticated_passcode' || localAuth === 'authenticated_firebase') {
-        this.isAdminAuthenticated = true;
-        this.notifyEditorState(true);
-      }
     } catch (err) {
       console.warn('Firebase initialization note:', err.message);
-      const localAuth = localStorage.getItem('portfolio_admin_session');
-      if (localAuth) {
-        this.isAdminAuthenticated = true;
-        this.notifyEditorState(true);
-      }
     }
   }
 
@@ -96,20 +84,10 @@ class FirebaseAuthManager {
     this.currentUser = user;
     if (user && (AUTHORIZED_ADMIN_EMAILS.includes(user.email.toLowerCase()) || AUTHORIZED_ADMIN_EMAILS.length === 0)) {
       this.isAdminAuthenticated = true;
-      localStorage.setItem('portfolio_admin_session', 'authenticated_firebase');
-      localStorage.setItem('portfolio_admin_user', JSON.stringify({ email: user.email, name: user.displayName }));
       this.notifyEditorState(true);
     } else {
-      const localAuth = localStorage.getItem('portfolio_admin_session');
-      if (localAuth === 'authenticated_passcode') {
-        this.isAdminAuthenticated = true;
-        this.notifyEditorState(true);
-      } else {
-        this.isAdminAuthenticated = false;
-        localStorage.removeItem('portfolio_admin_session');
-        localStorage.removeItem('portfolio_admin_user');
-        this.notifyEditorState(false);
-      }
+      this.isAdminAuthenticated = false;
+      this.notifyEditorState(false);
     }
   }
 

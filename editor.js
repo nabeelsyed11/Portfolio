@@ -57,12 +57,9 @@ class PortfolioEditor {
     }
   }
 
-  // Check if admin is already authenticated
+  // Check if admin modal requested via URL hash
   checkInitialAdminSession() {
-    const adminSession = localStorage.getItem('portfolio_admin_session');
-    if (adminSession) {
-      this.setAdminAccess(true);
-    }
+    localStorage.removeItem('portfolio_admin_session');
     if (window.location.hash === '#admin') {
       this.openAdminModal();
     }
@@ -72,20 +69,13 @@ class PortfolioEditor {
   setAdminAccess(isAuthenticated) {
     this.isAdmin = isAuthenticated;
     const body = document.body;
-    const toggleBtn = document.getElementById('editor-toggle-btn');
+    const toolbar = document.getElementById('editor-toolbar');
 
     if (isAuthenticated) {
       body.classList.add('admin-authenticated');
-      if (toggleBtn) {
-        toggleBtn.style.display = 'inline-flex';
-      }
     } else {
       body.classList.remove('admin-authenticated');
       body.classList.remove('editor-active');
-      if (toggleBtn) {
-        toggleBtn.style.display = 'none';
-      }
-      const toolbar = document.getElementById('editor-toolbar');
       if (toolbar) toolbar.classList.remove('open');
       this.enableContentEditable(false);
     }
