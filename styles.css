@@ -192,8 +192,9 @@ button {
 .brand-logo {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 0.15rem;
+  align-items: center;
+  text-align: center;
+  gap: 0.18rem;
 }
 
 .brand-name {
@@ -203,6 +204,7 @@ button {
   color: var(--text-heading);
   letter-spacing: -0.01em;
   line-height: 1.1;
+  text-align: center;
 }
 
 .brand-sub {
@@ -211,7 +213,9 @@ button {
   letter-spacing: 0.22em;
   color: var(--accent-green);
   text-transform: uppercase;
-  padding-left: 1px;
+  text-align: center;
+  align-self: center;
+  margin: 0 auto;
 }
 
 .nav-menu {
