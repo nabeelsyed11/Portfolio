@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Syed Nabeel Ahmed | Professional Portfolio</title>
+  <meta name="description" content="Portfolio of Syed Nabeel Ahmed. Explore selected case studies, achievements, core skills, and professional experience.">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+  
+  <!-- Portfolio Configuration Data -->
+  <script src="portfolio-data.js"></script>
+</head>
+<body>
+  <!-- Ambient Background Aura Glows -->
+  <div class="ambient-glow glow-1" aria-hidden="true"></div>
+  <div class="ambient-glow glow-2" aria-hidden="true"></div>
+  <div class="ambient-glow glow-3" aria-hidden="true"></div>
+
+  <!-- =========================================================================
+       HEADER & NAVIGATION BAR (EDITABLE)
+       ========================================================================= -->
+  <header class="header" id="navbar">
+    <div class="container nav-container">
+      <a href="#home" class="brand-logo" aria-label="Syed Nabeel Ahmed Portfolio Home">
+        <span class="brand-name" data-edit-key="brand.name">Syed Nabeel Ahmed</span>
+        <span class="brand-sub" data-edit-key="brand.subtitle">— PORTFOLIO —</span>
+      </a>
+
+      <nav class="nav-menu" id="nav-menu">
+        <a href="#home" class="nav-link active">Home</a>
+        <a href="#about" class="nav-link">About</a>
+        <a href="#skills" class="nav-link">Skills</a>
+        <a href="#projects" class="nav-link">Projects</a>
+        <a href="#contact" class="btn-hire-pill" data-edit-key="brand.hireButtonText">Hire Me</a>
+      </nav>
+
+      <button class="mobile-toggle" id="mobile-toggle" aria-label="Toggle navigation menu">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- =======================================================================
+         SECTION 1: HERO SECTION (EDITABLE)
+         ======================================================================= -->
+    <section id="home" class="hero-section">
+      <div class="container hero-grid">
+        <div class="hero-content">
+          <div class="section-tag">
+            <span class="tag-line"></span>
+            <span class="tag-text" data-edit-key="hero.tag">PROFESSIONAL PORTFOLIO</span>
+          </div>
+          <h1 class="hero-title" data-edit-key="hero.title" data-is-html="true">
+            Syed Nabeel<br>Ahmed
+          </h1>
+          <p class="hero-desc" data-edit-key="hero.description">
+            Explore selected case studies, achievements, and creative highlights. Discover an overview of my experience, areas of expertise, and professional journey.
+          </p>
+          <div class="hero-actions">
+            <a href="#projects" class="btn-outline-pill" data-edit-key="hero.buttonText">View Selected Work</a>
+          </div>
+        </div>
+
+        <div class="hero-visual">
+          <div class="arch-card-wrapper hero-arch">
+            <div class="arch-inner-outline"></div>
+            <div class="arch-img-frame">
+              <img src="assets/images/syed-nabeel-ahmed.jpg" alt="Syed Nabeel Ahmed - Professional Portrait" class="arch-img" data-img-key="hero.image" loading="eager">
+              <div class="img-edit-overlay"><span>📷 Change Photo</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         SECTION 2: ABOUT ME SECTION (EDITABLE)
+         ======================================================================= -->
+    <section id="about" class="about-section">
+      <div class="container about-grid">
+        <div class="about-visual">
+          <div class="arch-card-wrapper about-arch">
+            <div class="arch-inner-outline"></div>
+            <div class="arch-img-frame">
+              <img src="assets/images/about-working.jpg" alt="Syed Nabeel Ahmed focused at workstation" class="arch-img" data-img-key="about.image" loading="lazy">
+              <div class="img-edit-overlay"><span>📷 Change Photo</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="about-content">
+          <div class="section-tag">
+            <span class="tag-line"></span>
+            <span class="tag-text" data-edit-key="about.tag">ABOUT ME</span>
+          </div>
+          <h2 class="section-title" data-edit-key="about.title">Experience &amp; Expertise.</h2>
+          <p class="about-desc" data-edit-key="about.description">
+            I am a dedicated professional with a track record of driving success through strategic thinking and precise execution. My journey is defined by continuous learning, collaboration, and a passion for creating impactful solutions.
+          </p>
+
+          <div class="about-cards-grid" id="about-highlights-container">
+            <div class="about-card">
+              <div class="card-num" data-edit-key="about.highlights.0.number">01</div>
+              <p class="card-text" data-edit-key="about.highlights.0.text">
+                A proven track record of delivering high-quality case studies and successful end-to-end projects.
+              </p>
+            </div>
+            <div class="about-card">
+              <div class="card-num" data-edit-key="about.highlights.1.number">02</div>
+              <p class="card-text" data-edit-key="about.highlights.1.text">
+                Deep commitment to team collaboration, innovative problem solving, and continuous professional growth.
+              </p>
+            </div>
+          </div>
+
+          <div class="connect-profiles-block">
+            <span class="connect-label" data-edit-key="about.connectLabel">CONNECT &amp; PROFILES</span>
+            <div class="social-pills-row" id="about-social-pills">
+              <a href="https://www.linkedin.com/in/syednabeelahmed1" target="_blank" rel="noopener noreferrer" class="social-pill" aria-label="LinkedIn Profile">
+                <svg class="social-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                  <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.2V10.9H6.46M7.83 6.64c-.9 0-1.63.73-1.63 1.63s.73 1.63 1.63 1.63 1.63-.73 1.63-1.63c0-.9-.73-1.63-1.63-1.63Z"/>
+                </svg>
+                <span data-edit-key="about.socialLinks.0.name">LinkedIn</span>
+              </a>
+
+              <a href="https://github.com/nabeelsyed11" target="_blank" rel="noopener noreferrer" class="social-pill" aria-label="GitHub Profile">
+                <svg class="social-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                  <path d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.1-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2Z"/>
+                </svg>
+                <span data-edit-key="about.socialLinks.1.name">GitHub</span>
+              </a>
+
+              <a href="https://www.instagram.com/nabeelsyed_/" target="_blank" rel="noopener noreferrer" class="social-pill" aria-label="Instagram Profile">
+                <svg class="social-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                </svg>
+                <span data-edit-key="about.socialLinks.2.name">Instagram</span>
+              </a>
+
+              <a href="mailto:nabeelahmedna7860@gmail.com" class="social-pill" aria-label="Email Syed Nabeel Ahmed">
+                <svg class="social-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                  <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/>
+                </svg>
+                <span data-edit-key="about.socialLinks.3.name">Email</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         SECTION 3: CORE SKILLS SECTION (EDITABLE)
+         ======================================================================= -->
+    <section id="skills" class="skills-section">
+      <div class="container skills-grid">
+        <div class="skills-content">
+          <div class="section-tag">
+            <span class="tag-line"></span>
+            <span class="tag-text" data-edit-key="skills.tag">CORE SKILLS</span>
+          </div>
+          <h2 class="section-title" data-edit-key="skills.title" data-is-html="true">Areas of professional<br>expertise.</h2>
+
+          <div class="skills-cards-grid" id="skills-list-container">
+            <!-- Skill 1 -->
+            <div class="skill-card">
+              <div class="skill-header">
+                <span class="skill-indicator"></span>
+                <h3 class="skill-name" data-edit-key="skills.list.0.name">Strategic Planning</h3>
+              </div>
+              <p class="skill-desc" data-edit-key="skills.list.0.description">
+                Developing clear roadmaps and actionable strategies to achieve complex project goals.
+              </p>
+            </div>
+
+            <!-- Skill 2 -->
+            <div class="skill-card">
+              <div class="skill-header">
+                <span class="skill-indicator"></span>
+                <h3 class="skill-name" data-edit-key="skills.list.1.name">Project Management</h3>
+              </div>
+              <p class="skill-desc" data-edit-key="skills.list.1.description">
+                Leading cross-functional teams to deliver exceptional results on time and within scope.
+              </p>
+            </div>
+
+            <!-- Skill 3 -->
+            <div class="skill-card">
+              <div class="skill-header">
+                <span class="skill-indicator"></span>
+                <h3 class="skill-name" data-edit-key="skills.list.2.name">Technical Problem Solving</h3>
+              </div>
+              <p class="skill-desc" data-edit-key="skills.list.2.description">
+                Analyzing challenges and architecting robust, scalable, and innovative solutions.
+              </p>
+            </div>
+
+            <!-- Skill 4 -->
+            <div class="skill-card">
+              <div class="skill-header">
+                <span class="skill-indicator"></span>
+                <h3 class="skill-name" data-edit-key="skills.list.3.name">Creative Direction</h3>
+              </div>
+              <p class="skill-desc" data-edit-key="skills.list.3.description">
+                Ensuring outputs not only function flawlessly but also deliver an engaging, polished experience.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="skills-visual">
+          <div class="arch-card-wrapper skills-arch">
+            <div class="arch-img-frame">
+              <img src="assets/images/skills-desk.jpg" alt="Modern organized office workspace" class="arch-img" data-img-key="skills.image" loading="lazy">
+              <div class="img-edit-overlay"><span>📷 Change Photo</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         SECTION 4: SELECTED WORK / CASE STUDIES (EDITABLE)
+         ======================================================================= -->
+    <section id="projects" class="projects-section">
+      <div class="container">
+        <div class="projects-header-grid">
+          <div class="projects-header-left">
+            <div class="section-tag">
+              <span class="tag-line"></span>
+              <span class="tag-text" data-edit-key="projects.tag">SELECTED WORK</span>
+            </div>
+            <h2 class="section-title" data-edit-key="projects.title">Case studies &amp; achievements.</h2>
+          </div>
+          <div class="projects-header-right">
+            <p class="projects-subtext" data-edit-key="projects.description">
+              A curated selection of recent projects highlighting technical execution, creative problem solving, and measurable impact.
+            </p>
+          </div>
+        </div>
+
+        <div class="projects-grid" id="projects-list-container">
+          <!-- Project 1 -->
+          <article class="project-card" data-project="analytics">
+            <div class="project-img-frame">
+              <img src="assets/images/project-analytics.jpg" alt="Enterprise Analytics Dashboard Interface" class="project-img" data-img-key="projects.list.0.image" loading="lazy">
+              <div class="img-edit-overlay"><span>📷 Change Photo</span></div>
+            </div>
+            <div class="project-body">
+              <div class="project-meta-row">
+                <span class="role-pill" data-edit-key="projects.list.0.role">LEAD DEVELOPER</span>
+                <div class="project-type-icon" aria-label="Analytics icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                    <polyline points="17 6 23 6 23 12"></polyline>
+                  </svg>
+                </div>
+              </div>
+              <h3 class="project-title" data-edit-key="projects.list.0.title">Enterprise Analytics Dashboard</h3>
+              <p class="project-desc" data-edit-key="projects.list.0.summary">
+                Redesigned a complex data visualization platform, improving user engagement and reporting efficiency.
+              </p>
+            </div>
+          </article>
+
+          <!-- Project 2 -->
+          <article class="project-card" data-project="mobile">
+            <div class="project-img-frame">
+              <img src="assets/images/project-mobile.jpg" alt="Mobile App Launch UI Design" class="project-img" data-img-key="projects.list.1.image" loading="lazy">
+              <div class="img-edit-overlay"><span>📷 Change Photo</span></div>
+            </div>
+            <div class="project-body">
+              <div class="project-meta-row">
+                <span class="role-pill" data-edit-key="projects.list.1.role">PRODUCT MANAGER</span>
+                <div class="project-type-icon" aria-label="Mobile application icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                    <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                  </svg>
+                </div>
+              </div>
+              <h3 class="project-title" data-edit-key="projects.list.1.title">Mobile App Launch</h3>
+              <p class="project-desc" data-edit-key="projects.list.1.summary">
+                Led the cross-functional development and successful launch of a consumer-facing mobile application.
+              </p>
+            </div>
+          </article>
+
+          <!-- Project 3 -->
+          <article class="project-card" data-project="ecommerce">
+            <div class="project-img-frame">
+              <img src="assets/images/project-ecommerce.jpg" alt="E-Commerce Platform Architecture" class="project-img" data-img-key="projects.list.2.image" loading="lazy">
+              <div class="img-edit-overlay"><span>📷 Change Photo</span></div>
+            </div>
+            <div class="project-body">
+              <div class="project-meta-row">
+                <span class="role-pill" data-edit-key="projects.list.2.role">TECHNICAL LEAD</span>
+                <div class="project-type-icon" aria-label="E-Commerce icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>
+                  </svg>
+                </div>
+              </div>
+              <h3 class="project-title" data-edit-key="projects.list.2.title">E-Commerce Platform Rebuild</h3>
+              <p class="project-desc" data-edit-key="projects.list.2.summary">
+                Architected and implemented a scalable, modern storefront solution that increased conversion rates.
+              </p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         SECTION 5: CONTACT / LET'S COLLABORATE (EDITABLE)
+         ======================================================================= -->
+    <section id="contact" class="contact-section">
+      <div class="container contact-grid">
+        <div class="contact-left">
+          <div class="section-tag">
+            <span class="tag-line"></span>
+            <span class="tag-text" data-edit-key="contact.tag">LET'S COLLABORATE</span>
+          </div>
+          <h2 class="section-title" data-edit-key="contact.title">Contact for opportunities.</h2>
+          <p class="contact-desc" data-edit-key="contact.description">
+            Whether you have a specific project in mind, want to discuss a potential role, or just want to connect—I'd love to hear from you.
+          </p>
+
+          <div class="contact-status-badges">
+            <div class="status-item">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" class="status-icon">
+                <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/>
+              </svg>
+              <span data-edit-key="contact.badges.0.text">REPLIES WITHIN 24H</span>
+            </div>
+            <div class="status-item">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" class="status-icon">
+                <path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/>
+              </svg>
+              <span data-edit-key="contact.badges.1.text">OPEN TO OPPORTUNITIES</span>
+            </div>
+          </div>
+
+          <div class="contact-social-row">
+            <a href="https://www.linkedin.com/in/syednabeelahmed1" target="_blank" rel="noopener noreferrer" class="circle-social-btn" aria-label="LinkedIn">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.2V10.9H6.46M7.83 6.64c-.9 0-1.63.73-1.63 1.63s.73 1.63 1.63 1.63 1.63-.73 1.63-1.63c0-.9-.73-1.63-1.63-1.63Z"/>
+              </svg>
+            </a>
+            <a href="https://github.com/nabeelsyed11" target="_blank" rel="noopener noreferrer" class="circle-social-btn" aria-label="GitHub">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <path d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.1-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2Z"/>
+              </svg>
+            </a>
+            <a href="https://www.instagram.com/nabeelsyed_/" target="_blank" rel="noopener noreferrer" class="circle-social-btn" aria-label="Instagram">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <div class="contact-right">
+          <div class="contact-card">
+            <form id="contact-form" class="contact-form" novalidate>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="name" class="form-label">NAME</label>
+                  <input type="text" id="name" name="name" class="form-input" placeholder="Your name" required autocomplete="name">
+                </div>
+                <div class="form-group">
+                  <label for="email" class="form-label">EMAIL</label>
+                  <input type="email" id="email" name="email" class="form-input" placeholder="you@example.com" required autocomplete="email">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="message" class="form-label">MESSAGE</label>
+                <textarea id="message" name="message" class="form-textarea" rows="4" placeholder="How can I help you?" required></textarea>
+              </div>
+
+              <button type="submit" class="btn-send-message" id="submit-btn">
+                <span data-edit-key="contact.form.buttonText">Send Message</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Interactive Project Modal -->
+  <div id="project-modal" class="modal-backdrop" aria-hidden="true" role="dialog" aria-labelledby="modal-title">
+    <div class="modal-content">
+      <button class="modal-close-btn" id="modal-close" aria-label="Close project modal">&times;</button>
+      <div class="modal-body" id="modal-body">
+        <!-- Injected dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification System -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- Scripts -->
+  <script src="script.js"></script>
+  <script src="editor.js"></script>
+</body>
+</html>
