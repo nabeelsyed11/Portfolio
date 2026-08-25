@@ -489,65 +489,7 @@ class PortfolioEditor {
       }
     });
 
-    // In-browser private Firebase config toggle & save
-    const toggleFbBtn = document.getElementById('toggle-firebase-setup-btn');
-    const fbPanel = document.getElementById('firebase-setup-panel');
-    const fbSaveBtn = document.getElementById('save-browser-firebase-btn');
-    const fbApiKeyInput = document.getElementById('fb-api-key-input');
-    const fbProjectIdInput = document.getElementById('fb-project-id-input');
-
-    if (toggleFbBtn && fbPanel) {
-      toggleFbBtn.addEventListener('click', () => {
-        const isHidden = fbPanel.style.display === 'none';
-        fbPanel.style.display = isHidden ? 'flex' : 'none';
-      });
-    }
-
-    if (fbSaveBtn) {
-      fbSaveBtn.addEventListener('click', () => {
-        const apiKey = fbApiKeyInput.value.trim();
-        const projectId = fbProjectIdInput.value.trim();
-        if (apiKey && projectId) {
-          const cfg = {
-            apiKey: apiKey,
-            authDomain: `${projectId}.firebaseapp.com`,
-            projectId: projectId,
-            storageBucket: `${projectId}.appspot.com`
-          };
-          localStorage.setItem('portfolio_firebase_config', JSON.stringify(cfg));
-          this.showToast('✅ Firebase credentials saved privately in your browser storage (Zero Git exposure)!');
-          fbPanel.style.display = 'none';
-          window.location.reload();
-        } else {
-          adminErr.textContent = 'Please enter both API Key and Project ID.';
-          adminErr.style.display = 'block';
-        }
-      });
-    }
-
-    // Google Sign-In
-    if (btnGoogle) {
-      btnGoogle.addEventListener('click', async () => {
-        try {
-          adminErr.style.display = 'none';
-          btnGoogle.disabled = true;
-          btnGoogle.querySelector('span').textContent = 'Authenticating...';
-          await window.firebaseAuthManager.signInWithGoogle();
-          this.closeAdminModal();
-          this.setAdminAccess(true);
-          this.toggleEditMode(true);
-          this.showToast('👑 Welcome back, Syed Nabeel Ahmed! Visual Editor unlocked.');
-        } catch (err) {
-          adminErr.textContent = err.message || 'Failed to authenticate with Google.';
-          adminErr.style.display = 'block';
-        } finally {
-          btnGoogle.disabled = false;
-          btnGoogle.querySelector('span').textContent = 'Sign In with Google';
-        }
-      });
-    }
-
-    // Admin Passcode Sign-In
+    // Admin Password Sign-In
     if (adminForm) {
       adminForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -562,18 +504,17 @@ class PortfolioEditor {
             const hashArray = Array.from(new Uint8Array(hashBuffer));
             const inputHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
             if (inputHash === 'e43969ccdf2440baf3d904077d4088ef99c167cb967a5104226f0b5cc8c06273') {
-              localStorage.setItem('portfolio_admin_session', 'authenticated_passcode');
               this.setAdminAccess(true);
             } else {
-              throw new Error('Incorrect Admin Passcode. Access denied.');
+              throw new Error('Incorrect Admin Password. Access denied.');
             }
           }
           this.closeAdminModal();
           this.setAdminAccess(true);
           this.toggleEditMode(true);
-          this.showToast('👑 Admin Passcode Accepted: Visual Editor Unlocked!');
+          this.showToast('👑 Password Accepted: Visual Editor Unlocked!');
         } catch (err) {
-          adminErr.textContent = err.message || 'Incorrect passcode.';
+          adminErr.textContent = err.message || 'Incorrect password.';
           adminErr.style.display = 'block';
         }
       });
