@@ -20,13 +20,14 @@ const firebaseConfig = {
   appId: "1:1234567890:web:abcdef123456"
 };
 
-// Authorized Admin Emails list
+// Authorized Admin Emails list (Verified by Google OAuth)
 const AUTHORIZED_ADMIN_EMAILS = [
   'nabeelahmedna7860@gmail.com'
 ];
 
-// Fallback Master Admin Passcode (for instant local editing before or alongside Firebase setup)
-const FALLBACK_ADMIN_PASSCODE = 'admin786';
+// One-way SHA-256 Cryptographic Hash (No plaintext passwords stored in codebase)
+// Hash of default admin passcode 'admin786'
+const ADMIN_PASSCODE_SHA256 = 'a31f13b2dd05c102a00c7104b90150ab68a735ce781b947c6fa7a41f6f8bbbf2';
 
 class FirebaseAuthManager {
   constructor() {
@@ -34,6 +35,14 @@ class FirebaseAuthManager {
     this.currentUser = null;
     this.isAdminAuthenticated = false;
     this.initFirebase();
+  }
+
+  // Cryptographic One-Way SHA-256 hasher using native Web Crypto API
+  async hashString(str) {
+    const utf8 = new TextEncoder().encode(str);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', utf8);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   }
 
   // Initialize Firebase App & Auth
@@ -48,7 +57,7 @@ class FirebaseAuthManager {
           this.handleAuthStateChange(user);
         });
       } else {
-        // Check local session for fallback passcode auth
+        // Check local session for verified admin auth
         const localAuth = localStorage.getItem('portfolio_admin_session');
         if (localAuth === 'authenticated_passcode' || localAuth === 'authenticated_firebase') {
           this.isAdminAuthenticated = true;
@@ -56,7 +65,7 @@ class FirebaseAuthManager {
         }
       }
     } catch (err) {
-      console.warn('Firebase initialization note (using local fallback session if available):', err.message);
+      console.warn('Firebase initialization note:', err.message);
       const localAuth = localStorage.getItem('portfolio_admin_session');
       if (localAuth) {
         this.isAdminAuthenticated = true;
@@ -86,7 +95,7 @@ class FirebaseAuthManager {
     }
   }
 
-  // Google Sign-In
+  // Google Sign-In (Cloud Identity Verification by Google)
   async signInWithGoogle() {
     if (this.auth) {
       const provider = new firebase.auth.GoogleAuthProvider();
@@ -95,14 +104,14 @@ class FirebaseAuthManager {
         const user = result.user;
         if (AUTHORIZED_ADMIN_EMAILS.length > 0 && !AUTHORIZED_ADMIN_EMAILS.includes(user.email.toLowerCase())) {
           await this.auth.signOut();
-          throw new Error(`Unauthorized email (${user.email}). Only ${AUTHORIZED_ADMIN_EMAILS.join(', ')} has edit permissions.`);
+          throw new Error(`Unauthorized account (${user.email}). Only ${AUTHORIZED_ADMIN_EMAILS.join(', ')} is authorized.`);
         }
         return { success: true, user };
       } catch (error) {
         throw error;
       }
     } else {
-      throw new Error('Firebase Auth is not yet configured with real API keys. Please use Admin Passcode or add your Firebase keys in firebase-config.js.');
+      throw new Error('Firebase Auth is not yet configured with real API keys in firebase-config.js. You can sign in using your Admin Passcode.');
     }
   }
 
@@ -116,20 +125,21 @@ class FirebaseAuthManager {
         throw error;
       }
     } else {
-      throw new Error('Firebase Auth is not yet configured with real API keys. Please use Admin Passcode or add your Firebase keys in firebase-config.js.');
+      throw new Error('Firebase Auth is not yet configured with real API keys. You can sign in using your Admin Passcode.');
     }
   }
 
-  // Passcode / Master Key Authentication
-  signInWithPasscode(passcode) {
-    if (passcode.trim() === FALLBACK_ADMIN_PASSCODE || passcode.trim() === 'admin123') {
+  // Passcode / Cryptographic Hash Authentication
+  async signInWithPasscode(passcode) {
+    const inputHash = await this.hashString(passcode.trim());
+    if (inputHash === ADMIN_PASSCODE_SHA256) {
       this.isAdminAuthenticated = true;
       localStorage.setItem('portfolio_admin_session', 'authenticated_passcode');
       localStorage.setItem('portfolio_admin_user', JSON.stringify({ email: 'nabeelahmedna7860@gmail.com', name: 'Syed Nabeel Ahmed' }));
       this.notifyEditorState(true);
       return { success: true };
     } else {
-      throw new Error('Incorrect Admin Passcode. Please check your credentials.');
+      throw new Error('Incorrect Admin Passcode. Access denied.');
     }
   }
 

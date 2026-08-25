@@ -534,12 +534,12 @@ class PortfolioEditor {
 
     // Admin Passcode Sign-In
     if (adminForm) {
-      adminForm.addEventListener('submit', (e) => {
+      adminForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         try {
           adminErr.style.display = 'none';
           const passcode = adminPasscode.value;
-          window.firebaseAuthManager.signInWithPasscode(passcode);
+          await window.firebaseAuthManager.signInWithPasscode(passcode);
           this.closeAdminModal();
           this.setAdminAccess(true);
           this.toggleEditMode(true);
