@@ -82,6 +82,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const modalBody = document.getElementById('modal-body');
   const modalClose = document.getElementById('modal-close');
   const toastContainer = document.getElementById('toast-container');
+  const themeToggle = document.getElementById('theme-toggle');
+
+  // Theme Switcher Logic
+  if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('portfolio_theme', newTheme);
+      if (window.portfolioEditor) {
+        window.portfolioEditor.showToast(newTheme === 'dark' ? '🌙 Dark Mode Activated' : '☀️ Light Mode Activated');
+      }
+    });
+  }
 
   // 3. Header scroll effect & active section tracking
   const handleScroll = () => {
