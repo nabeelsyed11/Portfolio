@@ -4,7 +4,6 @@ Thumbs.db
 desktop.ini
 
 # Private & Sensitive Configuration
-firebase-config.js
 *.local.js
 .env
 .env.local
