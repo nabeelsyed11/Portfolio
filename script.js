@@ -211,8 +211,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.querySelectorAll('.project-card').forEach(card => {
     card.addEventListener('click', (e) => {
-      // Don't open modal if user is in edit mode and clicking photo overlay
-      if (document.body.classList.contains('editor-active') && e.target.closest('.img-edit-overlay')) {
+      // In edit mode, do NOT open view modal so user can edit cards directly
+      if (document.body.classList.contains('editor-active')) {
         return;
       }
       const key = card.getAttribute('data-project');

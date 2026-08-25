@@ -1,12 +1,12 @@
 /**
  * ==============================================================================
- * PORTFOLIO LIVE VISUAL EDITOR (CMS ENGINE 4.0 - ADVANCED TEXT & DRAG EDITOR)
+ * PORTFOLIO LIVE VISUAL EDITOR (CMS ENGINE 5.0 - FULL CASE STUDY & CARD EDITOR)
  * ==============================================================================
- * Guarantees 100% smooth text and heading editing:
- * 1. Direct inline typing with auto-focus and instant visual sync.
- * 2. Dedicated Text Edit Modal for modifying any heading/text in an input box.
- * 3. Photo replacement modal with file upload and preview.
- * 4. Freeform Drag & Move for container boxes and cards.
+ * Enables complete, full-fidelity editing for:
+ * 1. Case Studies & Achievements cards (Images, Titles, Roles, Summaries, Tech Stack, & Details)
+ * 2. All Headings, sub-headings, and text blocks (Inline & Modal popup)
+ * 3. Photo replacements across all sections (Computer file upload or URL)
+ * 4. Freeform Drag & Move repositioning
  * ==============================================================================
  */
 
@@ -15,6 +15,7 @@ class PortfolioEditor {
     this.isEditing = false;
     this.activeImgTarget = null;
     this.activeTextTarget = null;
+    this.activeProjectIndex = null;
     this.isDragging = false;
     this.currentDragEl = null;
     this.dragStartX = 0;
@@ -28,6 +29,7 @@ class PortfolioEditor {
     this.bindEvents();
     this.autoHydrateDOM();
     this.setupDraggableContainers();
+    this.setupProjectEditButtons();
     this.applySavedPositions();
   }
 
@@ -84,7 +86,7 @@ class PortfolioEditor {
     });
   }
 
-  // 3. Setup Draggable Move Handles ONLY on container cards & boxes (never on text!)
+  // 3. Setup Draggable Move Handles on container boxes
   setupDraggableContainers() {
     const containerSelectors = [
       '.hero-content',
@@ -107,7 +109,6 @@ class PortfolioEditor {
           el.setAttribute('data-move-id', `container_${el.className.split(' ')[0]}_${idx++}`);
         }
 
-        // Add Move Handle only if not present and element is NOT a text node
         if (!el.querySelector(':scope > .move-drag-handle')) {
           const handle = document.createElement('div');
           handle.className = 'move-drag-handle';
@@ -129,7 +130,32 @@ class PortfolioEditor {
     });
   }
 
-  // 4. Apply saved positions from localStorage
+  // 4. Setup "Edit Full Case Study" Badges on Project Cards
+  setupProjectEditButtons() {
+    const projectCards = document.querySelectorAll('.project-card');
+    projectCards.forEach((card, index) => {
+      if (!card.querySelector('.card-full-edit-btn')) {
+        const btn = document.createElement('button');
+        btn.className = 'card-full-edit-btn';
+        btn.setAttribute('type', 'button');
+        btn.innerHTML = `
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+          </svg>
+          <span>Edit Case Study</span>
+        `;
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          this.openProjectEditModal(index);
+        });
+        card.appendChild(btn);
+      }
+    });
+  }
+
+  // 5. Apply saved positions from localStorage
   applySavedPositions() {
     Object.keys(this.elementPositions).forEach(id => {
       const el = document.querySelector(`[data-move-id="${id}"]`);
@@ -141,7 +167,7 @@ class PortfolioEditor {
     });
   }
 
-  // 5. Create Editor UI, Toolbar, Image Modal & Text Edit Modal
+  // 6. Create Editor UI, Toolbar, & Modals
   createEditorUI() {
     // Floating Toggle Button
     const toggleBtn = document.createElement('button');
@@ -166,7 +192,7 @@ class PortfolioEditor {
         <span class="live-dot"></span>
         <div class="toolbar-text-group">
           <strong>Visual Editor Active</strong>
-          <small>Click any heading or text to edit | Double-click for Edit Popup | Drag ✥ Move to reposition</small>
+          <small>Click any heading or card to edit | Click "Edit Case Study" on cards | Drag ✥ Move</small>
         </div>
       </div>
       <div class="toolbar-actions">
@@ -258,8 +284,8 @@ class PortfolioEditor {
           <div class="editor-form-group">
             <label id="text-modal-field-label">Content:</label>
             <textarea id="text-modal-input" class="editor-textarea" rows="4" placeholder="Enter your text here..."></textarea>
-            <small id="text-modal-hint" style="color: var(--text-muted); display: block; margin-top: 0.4rem;">
-              You can type text freely. To add a line break in titles, press Enter.
+            <small style="color: var(--text-muted); display: block; margin-top: 0.4rem;">
+              You can type text freely. Press Enter for line breaks.
             </small>
           </div>
         </div>
@@ -270,9 +296,92 @@ class PortfolioEditor {
       </div>
     `;
     document.body.appendChild(textModal);
+
+    // Full Case Study Card Editor Modal
+    const projectModal = document.createElement('div');
+    projectModal.id = 'editor-project-card-modal';
+    projectModal.className = 'editor-modal-backdrop';
+    projectModal.innerHTML = `
+      <div class="editor-modal-card editor-modal-card-lg">
+        <div class="editor-modal-header">
+          <h3>🗂️ Edit Case Study & Achievement</h3>
+          <button id="project-card-modal-close" class="editor-modal-close" aria-label="Close modal">&times;</button>
+        </div>
+        <div class="editor-modal-body modal-scrollable-body">
+          <div class="editor-form-row">
+            <div class="editor-form-group flex-2">
+              <label>Project Title</label>
+              <input type="text" id="p-edit-title" class="editor-input" placeholder="e.g. Enterprise Analytics Dashboard">
+            </div>
+            <div class="editor-form-group flex-1">
+              <label>Role Badge</label>
+              <input type="text" id="p-edit-role" class="editor-input" placeholder="e.g. LEAD DEVELOPER">
+            </div>
+          </div>
+
+          <div class="editor-form-group">
+            <label>Project Image</label>
+            <div class="p-img-edit-row">
+              <div class="p-img-preview-thumb">
+                <img id="p-edit-img-preview" src="" alt="Project thumbnail">
+              </div>
+              <div class="p-img-inputs">
+                <input type="file" id="p-edit-file" class="editor-file-input" accept="image/*">
+                <input type="text" id="p-edit-img-url" class="editor-input" placeholder="or paste Image URL / Path">
+              </div>
+            </div>
+          </div>
+
+          <div class="editor-form-group">
+            <label>Card Summary Description</label>
+            <textarea id="p-edit-summary" class="editor-textarea" rows="2" placeholder="Brief summary on the card..."></textarea>
+          </div>
+
+          <div class="editor-form-row">
+            <div class="editor-form-group flex-1">
+              <label>Duration</label>
+              <input type="text" id="p-edit-duration" class="editor-input" placeholder="e.g. 6 Months">
+            </div>
+            <div class="editor-form-group flex-2">
+              <label>Tech Stack / Technologies</label>
+              <input type="text" id="p-edit-tech" class="editor-input" placeholder="e.g. React, TypeScript, Node.js">
+            </div>
+          </div>
+
+          <div class="editor-form-group">
+            <label>Detailed Case Study Narrative (shown in view popup)</label>
+            <textarea id="p-edit-details" class="editor-textarea" rows="4" placeholder="Full details of challenges, solution, and impact..."></textarea>
+          </div>
+        </div>
+        <div class="editor-modal-footer">
+          <button id="p-edit-cancel" class="editor-btn editor-btn-secondary">Cancel</button>
+          <button id="p-edit-apply" class="editor-btn editor-btn-primary">Apply & Save Card</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(projectModal);
   }
 
-  // 6. Bind Events
+  // 7. Open Full Case Study Editor Modal
+  openProjectEditModal(index) {
+    this.activeProjectIndex = index;
+    const projectList = (window.portfolioData && window.portfolioData.projects && window.portfolioData.projects.list) || [];
+    const project = projectList[index] || {};
+
+    const modal = document.getElementById('editor-project-card-modal');
+    document.getElementById('p-edit-title').value = project.title || '';
+    document.getElementById('p-edit-role').value = project.role || '';
+    document.getElementById('p-edit-img-url').value = project.image || '';
+    document.getElementById('p-edit-img-preview').src = project.image || '';
+    document.getElementById('p-edit-summary').value = project.summary || '';
+    document.getElementById('p-edit-duration').value = project.duration || '';
+    document.getElementById('p-edit-tech').value = project.technologies || '';
+    document.getElementById('p-edit-details').value = project.details || project.summary || '';
+
+    modal.classList.add('open');
+  }
+
+  // 8. Bind Events
   bindEvents() {
     const toggleBtn = document.getElementById('editor-toggle-btn');
     const saveBtn = document.getElementById('editor-save-btn');
@@ -296,7 +405,15 @@ class PortfolioEditor {
     const textCancel = document.getElementById('text-modal-cancel');
     const textApply = document.getElementById('text-modal-apply');
     const textInput = document.getElementById('text-modal-input');
-    const textLabel = document.getElementById('text-modal-field-label');
+
+    // Project Card Modal
+    const pModal = document.getElementById('editor-project-card-modal');
+    const pClose = document.getElementById('project-card-modal-close');
+    const pCancel = document.getElementById('p-edit-cancel');
+    const pApply = document.getElementById('p-edit-apply');
+    const pFile = document.getElementById('p-edit-file');
+    const pImgUrl = document.getElementById('p-edit-img-url');
+    const pImgPreview = document.getElementById('p-edit-img-preview');
 
     toggleBtn.addEventListener('click', () => this.toggleEditMode());
     exitBtn.addEventListener('click', () => this.toggleEditMode(false));
@@ -345,7 +462,14 @@ class PortfolioEditor {
     textClose.addEventListener('click', closeTextModal);
     textCancel.addEventListener('click', closeTextModal);
 
-    // Apply Photo
+    const closePModal = () => {
+      pModal.classList.remove('open');
+      this.activeProjectIndex = null;
+    };
+    pClose.addEventListener('click', closePModal);
+    pCancel.addEventListener('click', closePModal);
+
+    // Image Modal Upload
     imgFileInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (file) {
@@ -373,6 +497,61 @@ class PortfolioEditor {
         }
         this.showToast('✅ Photo updated successfully!');
         closeImgModal();
+      }
+    });
+
+    // Project Modal Image Upload
+    pFile.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          pImgPreview.src = event.target.result;
+          pImgUrl.value = event.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    pImgUrl.addEventListener('input', () => {
+      pImgPreview.src = pImgUrl.value;
+    });
+
+    // Apply Full Project Card Edits
+    pApply.addEventListener('click', () => {
+      if (this.activeProjectIndex !== null) {
+        const idx = this.activeProjectIndex;
+        if (!window.portfolioData.projects) window.portfolioData.projects = { list: [] };
+        if (!window.portfolioData.projects.list) window.portfolioData.projects.list = [];
+        if (!window.portfolioData.projects.list[idx]) window.portfolioData.projects.list[idx] = {};
+
+        const p = window.portfolioData.projects.list[idx];
+        p.title = document.getElementById('p-edit-title').value.trim();
+        p.role = document.getElementById('p-edit-role').value.trim();
+        p.image = pImgUrl.value.trim();
+        p.summary = document.getElementById('p-edit-summary').value.trim();
+        p.duration = document.getElementById('p-edit-duration').value.trim();
+        p.technologies = document.getElementById('p-edit-tech').value.trim();
+        p.details = document.getElementById('p-edit-details').value.trim();
+
+        // Update corresponding DOM card on screen
+        const cards = document.querySelectorAll('.project-card');
+        if (cards[idx]) {
+          const card = cards[idx];
+          const imgEl = card.querySelector('.project-img');
+          const roleEl = card.querySelector('.role-pill');
+          const titleEl = card.querySelector('.project-title');
+          const descEl = card.querySelector('.project-desc');
+
+          if (imgEl && p.image) imgEl.src = p.image;
+          if (roleEl) roleEl.textContent = p.role;
+          if (titleEl) titleEl.textContent = p.title;
+          if (descEl) descEl.textContent = p.summary;
+        }
+
+        localStorage.setItem('custom_portfolio_data', JSON.stringify(window.portfolioData));
+        this.showToast('✅ Case Study Card updated successfully!');
+        closePModal();
       }
     });
 
@@ -475,8 +654,10 @@ class PortfolioEditor {
       if (e.target.closest('#editor-toolbar') || 
           e.target.closest('#editor-img-modal') || 
           e.target.closest('#editor-text-modal') || 
+          e.target.closest('#editor-project-card-modal') || 
           e.target.closest('#editor-toggle-btn') || 
-          e.target.closest('#toast-container')) {
+          e.target.closest('#toast-container') ||
+          e.target.closest('.card-full-edit-btn')) {
         return;
       }
 
@@ -488,7 +669,7 @@ class PortfolioEditor {
       }
 
       // Check if clicking an image
-      const imgFrame = e.target.closest('.arch-img-frame, .project-img-frame, .arch-card-wrapper, .project-card, [data-img-container]');
+      const imgFrame = e.target.closest('.arch-img-frame, .project-img-frame, .arch-card-wrapper, [data-img-container]');
       const directImg = e.target.closest('img[data-img-key]');
       const overlay = e.target.closest('.img-edit-overlay');
 
@@ -512,7 +693,6 @@ class PortfolioEditor {
         if (parentAnchor && !parentAnchor.classList.contains('editor-btn')) {
           e.preventDefault();
         }
-        // Focus and select text for effortless typing
         editable.focus();
         return;
       }
@@ -562,7 +742,7 @@ class PortfolioEditor {
     textInput.select();
   }
 
-  // 7. Toggle visual edit mode
+  // 9. Toggle visual edit mode
   toggleEditMode(forceState = null) {
     this.isEditing = forceState !== null ? forceState : !this.isEditing;
     const body = document.body;
@@ -576,7 +756,7 @@ class PortfolioEditor {
       toggleBtn.classList.add('active');
       btnLabel.textContent = '✏️ Editing Active';
       this.enableContentEditable(true);
-      this.showToast('✏️ Edit Mode Active: Click any heading/text to type directly, or double-click for Edit Popup!');
+      this.showToast('✏️ Edit Mode Active: Edit text directly, click photos, or click "Edit Case Study" on cards!');
     } else {
       this.syncDOMToData();
       localStorage.setItem('custom_portfolio_data', JSON.stringify(window.portfolioData));
@@ -590,7 +770,7 @@ class PortfolioEditor {
     }
   }
 
-  // 8. Enable/disable contenteditable on tagged text nodes
+  // 10. Enable/disable contenteditable on tagged text nodes
   enableContentEditable(enable) {
     const editables = document.querySelectorAll('[data-edit-key]');
     editables.forEach(el => {
@@ -604,7 +784,7 @@ class PortfolioEditor {
     });
   }
 
-  // 9. Sync DOM edits into memory window.portfolioData
+  // 11. Sync DOM edits into memory window.portfolioData
   syncDOMToData() {
     const editables = document.querySelectorAll('[data-edit-key]');
     editables.forEach(el => {
@@ -625,7 +805,7 @@ class PortfolioEditor {
     });
   }
 
-  // 10. Helper: set nested property using dot-path notation
+  // 12. Helper: set nested property using dot-path notation
   setNestedValue(obj, path, value) {
     if (!path || !obj) return;
     const keys = path.split('.');
@@ -644,7 +824,7 @@ class PortfolioEditor {
     current[lastKey] = value;
   }
 
-  // 11. Export updated configuration file (portfolio-data.js)
+  // 13. Export updated configuration file (portfolio-data.js)
   exportConfigFile() {
     const jsonString = JSON.stringify(window.portfolioData, null, 2);
     const fileContent = `/**
@@ -668,7 +848,7 @@ window.portfolioData = ${jsonString};
     this.showToast('📥 Downloaded updated portfolio-data.js!');
   }
 
-  // 12. Toast notification helper
+  // 14. Toast notification helper
   showToast(message) {
     let container = document.getElementById('toast-container');
     if (!container) {

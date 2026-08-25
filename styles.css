@@ -1527,6 +1527,99 @@ body.editor-active .project-img-frame:hover .img-edit-overlay {
   gap: 0.75rem;
 }
 
+/* Card Full Edit Button in Edit Mode */
+.card-full-edit-btn {
+  display: none;
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  z-index: 50;
+  background-color: #1e3b2b;
+  color: #ffffff;
+  border: 1px solid rgba(179, 199, 166, 0.6);
+  border-radius: var(--radius-pill);
+  padding: 0.45rem 0.95rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  align-items: center;
+  gap: 0.4rem;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.card-full-edit-btn:hover {
+  background-color: #2f5c40;
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+}
+
+body.editor-active .project-card .card-full-edit-btn {
+  display: inline-flex;
+}
+
+body.editor-active .project-card {
+  position: relative;
+}
+
+/* Large Editor Modal for Case Studies */
+.editor-modal-card-lg {
+  max-width: 650px !important;
+  width: 95% !important;
+}
+
+.modal-scrollable-body {
+  max-height: 75vh;
+  overflow-y: auto;
+  padding: 1.5rem;
+}
+
+.editor-form-row {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+}
+
+.editor-form-row .flex-1 {
+  flex: 1;
+}
+
+.editor-form-row .flex-2 {
+  flex: 2;
+}
+
+.p-img-edit-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background-color: var(--bg-subtle);
+  padding: 0.85rem;
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--border-color);
+}
+
+.p-img-preview-thumb {
+  width: 100px;
+  height: 65px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background-color: #2b3a32;
+  flex-shrink: 0;
+}
+
+.p-img-preview-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.p-img-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex-grow: 1;
+}
+
 /* --- Responsive Media Queries --- */
 @media (max-width: 1024px) {
   .hero-grid,
