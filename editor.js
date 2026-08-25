@@ -29,6 +29,7 @@ class PortfolioEditor {
     this.createEditorUI();
     this.bindEvents();
     this.autoHydrateDOM();
+    this.enableContentEditable(false);
     this.setupDraggableContainers();
     this.setupProjectEditButtons();
     this.applySavedPositions();
@@ -381,6 +382,11 @@ class PortfolioEditor {
 
   // 8. Open Full Case Study Editor Modal
   openProjectEditModal(index) {
+    if (!this.isAdmin || !this.isEditing) {
+      this.openAdminModal();
+      return;
+    }
+
     this.activeProjectIndex = index;
     const projectList = (window.portfolioData && window.portfolioData.projects && window.portfolioData.projects.list) || [];
     const project = projectList[index] || {};
@@ -752,7 +758,7 @@ class PortfolioEditor {
 
     // --- DRAG & MOVE INTERACTION ENGINE ---
     document.addEventListener('mousedown', (e) => {
-      if (!this.isEditing) return;
+      if (!this.isAdmin || !this.isEditing) return;
 
       const handle = e.target.closest('.move-drag-handle');
       if (handle) {
@@ -779,7 +785,7 @@ class PortfolioEditor {
     });
 
     document.addEventListener('mousemove', (e) => {
-      if (!this.isDragging || !this.currentDragEl) return;
+      if (!this.isAdmin || !this.isEditing || !this.isDragging || !this.currentDragEl) return;
 
       e.preventDefault();
       const dx = e.clientX - this.dragStartX;
@@ -807,9 +813,9 @@ class PortfolioEditor {
       }
     });
 
-    // Double-Click to open Text Edit Modal on any heading or text
+    // Double-Click to open Text Edit Modal on any heading or text (Requires Active Admin Edit Mode)
     document.addEventListener('dblclick', (e) => {
-      if (!this.isEditing) return;
+      if (!this.isAdmin || !this.isEditing) return;
       const editable = e.target.closest('[data-edit-key]');
       if (editable) {
         e.preventDefault();
@@ -818,16 +824,15 @@ class PortfolioEditor {
       }
     });
 
-    // Click handler in Edit Mode
+    // Click handler in Edit Mode (Requires Active Admin Edit Mode)
     document.addEventListener('click', (e) => {
-      if (!this.isEditing) return;
+      if (!this.isAdmin || !this.isEditing) return;
 
       if (e.target.closest('#editor-toolbar') || 
           e.target.closest('#editor-img-modal') || 
           e.target.closest('#editor-text-modal') || 
           e.target.closest('#editor-project-card-modal') || 
           e.target.closest('#admin-auth-modal') || 
-          e.target.closest('#editor-toggle-btn') || 
           e.target.closest('#toast-container') ||
           e.target.closest('.card-full-edit-btn')) {
         return;
@@ -875,9 +880,9 @@ class PortfolioEditor {
       }
     });
 
-    // Real-time live synchronization while typing
+    // Real-time live synchronization while typing (Requires Active Admin Edit Mode)
     document.addEventListener('input', (e) => {
-      if (!this.isEditing) return;
+      if (!this.isAdmin || !this.isEditing) return;
       const editable = e.target.closest('[data-edit-key]');
       if (editable) {
         const key = editable.getAttribute('data-edit-key');
@@ -888,7 +893,7 @@ class PortfolioEditor {
     });
 
     document.addEventListener('blur', (e) => {
-      if (!this.isEditing) return;
+      if (!this.isAdmin || !this.isEditing) return;
       const editable = e.target.closest('[data-edit-key]');
       if (editable) {
         this.syncDOMToData();
@@ -897,8 +902,13 @@ class PortfolioEditor {
     }, true);
   }
 
-  // Open the Text Modal for convenient editing
+  // Open the Text Modal for convenient editing (Strict Admin Only)
   openTextModal(el) {
+    if (!this.isAdmin || !this.isEditing) {
+      this.openAdminModal();
+      return;
+    }
+
     this.activeTextTarget = el;
     const textModal = document.getElementById('editor-text-modal');
     const textInput = document.getElementById('text-modal-input');
