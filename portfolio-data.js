@@ -179,5 +179,15 @@ window.portfolioData = {
       messagePlaceholder: "How can I help you?",
       buttonText: "Send Message"
     }
+  },
+
+  // --- Footer Section ---
+  footer: {
+    tagline: "Showcasing professional work, skills, and selected projects. Open for collaboration and new opportunities.",
+    copyright: "© 2026 Syed Nabeel Ahmed. All rights reserved.",
+    exploreTitle: "EXPLORE",
+    socialTitle: "CONTACT & SOCIAL",
+    socialText: "Available for remote work and exciting new collaborations.",
+    bottomNote: "Designed for clarity, focus, and impact."
   }
 };
