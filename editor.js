@@ -574,8 +574,21 @@ class PortfolioEditor {
         e.preventDefault();
         try {
           adminErr.style.display = 'none';
-          const passcode = adminPasscode.value;
-          await window.firebaseAuthManager.signInWithPasscode(passcode);
+          const passcode = adminPasscode.value.trim();
+          if (window.firebaseAuthManager) {
+            await window.firebaseAuthManager.signInWithPasscode(passcode);
+          } else {
+            const utf8 = new TextEncoder().encode(passcode);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', utf8);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const inputHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            if (inputHash === 'e43969ccdf2440baf3d904077d4088ef99c167cb967a5104226f0b5cc8c06273') {
+              localStorage.setItem('portfolio_admin_session', 'authenticated_passcode');
+              this.setAdminAccess(true);
+            } else {
+              throw new Error('Incorrect Admin Passcode. Access denied.');
+            }
+          }
           this.closeAdminModal();
           this.setAdminAccess(true);
           this.toggleEditMode(true);
