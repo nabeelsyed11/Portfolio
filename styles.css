@@ -1253,8 +1253,9 @@ section {
    LIVE VISUAL EDITOR STYLES & INTERFACE
    ========================================================================== */
 
-/* Floating Edit Mode Button */
+/* Floating Edit Mode Button (Hidden until Admin authenticates) */
 .editor-floating-btn {
+  display: none;
   position: fixed;
   bottom: 2rem;
   left: 2rem;
@@ -1264,13 +1265,17 @@ section {
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: var(--radius-pill);
   padding: 0.75rem 1.4rem;
-  display: inline-flex;
   align-items: center;
   gap: 0.6rem;
   font-size: 0.9rem;
   font-weight: 600;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
   transition: all var(--transition-fast);
+}
+
+body.admin-authenticated .editor-floating-btn,
+body.editor-active .editor-floating-btn {
+  display: inline-flex;
 }
 
 .editor-floating-btn:hover {
@@ -1282,6 +1287,142 @@ section {
 .editor-floating-btn.active {
   background-color: #3f7051;
   border-color: #a8c7b0;
+}
+
+/* Footer Bottom Row & Admin Portal Link */
+.footer-bottom-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+}
+
+.admin-portal-link {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+  opacity: 0.65;
+  transition: all var(--transition-fast);
+  padding: 0.3rem 0.6rem;
+  border-radius: var(--radius-sm);
+}
+
+.admin-portal-link:hover {
+  opacity: 1;
+  color: var(--accent-green);
+  background-color: rgba(53, 93, 68, 0.12);
+}
+
+/* Admin Auth Modal Styles */
+.admin-auth-card {
+  max-width: 440px !important;
+}
+
+.admin-auth-header-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.lock-icon-badge {
+  font-size: 1.3rem;
+}
+
+.admin-auth-subtext {
+  font-size: 0.92rem;
+  color: var(--text-body);
+  line-height: 1.55;
+  margin-bottom: 0.85rem;
+}
+
+.admin-auth-error-msg {
+  background-color: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #dc2626;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+[data-theme="dark"] .admin-auth-error-msg {
+  color: #fca5a5;
+}
+
+.btn-google-auth {
+  width: 100%;
+  padding: 0.85rem 1.25rem;
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-heading);
+  font-size: 0.95rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+
+.btn-google-auth:hover {
+  border-color: var(--accent-green);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 1.25rem 0;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.auth-divider span {
+  padding: 0 0.85rem;
+}
+
+.btn-block-auth {
+  width: 100%;
+  justify-content: center;
+  padding: 0.85rem;
+  font-size: 0.95rem;
+  margin-top: 0.5rem;
+}
+
+.admin-auth-footer {
+  justify-content: center !important;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.admin-auth-footer kbd {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 0.15rem 0.4rem;
+  font-size: 0.75rem;
+  font-family: inherit;
 }
 
 /* Floating Action Toolbar */

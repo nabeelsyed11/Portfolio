@@ -1,18 +1,19 @@
 /**
  * ==============================================================================
- * PORTFOLIO LIVE VISUAL EDITOR (CMS ENGINE 5.0 - FULL CASE STUDY & CARD EDITOR)
+ * PORTFOLIO LIVE VISUAL EDITOR (CMS ENGINE 6.0 - AUTHENTICATED & SECURE)
  * ==============================================================================
- * Enables complete, full-fidelity editing for:
- * 1. Case Studies & Achievements cards (Images, Titles, Roles, Summaries, Tech Stack, & Details)
- * 2. All Headings, sub-headings, and text blocks (Inline & Modal popup)
- * 3. Photo replacements across all sections (Computer file upload or URL)
- * 4. Freeform Drag & Move repositioning
+ * Gated by Firebase & Admin Authentication:
+ * - Hidden from regular visitors by default.
+ * - Unlocked via Firebase Google Sign-In, Email/Password, or Admin Passcode.
+ * - Secret keyboard shortcut: Ctrl + Shift + E (or #admin in URL / Footer link).
+ * - Full on-screen editing, photo replacement, case study modal, and drag & move.
  * ==============================================================================
  */
 
 class PortfolioEditor {
   constructor() {
     this.isEditing = false;
+    this.isAdmin = false;
     this.activeImgTarget = null;
     this.activeTextTarget = null;
     this.activeProjectIndex = null;
@@ -31,6 +32,7 @@ class PortfolioEditor {
     this.setupDraggableContainers();
     this.setupProjectEditButtons();
     this.applySavedPositions();
+    this.checkInitialAdminSession();
   }
 
   // 1. Initialize local storage or fallback to default portfolioData
@@ -55,7 +57,41 @@ class PortfolioEditor {
     }
   }
 
-  // 2. Hydrate DOM from portfolioData
+  // Check if admin is already authenticated
+  checkInitialAdminSession() {
+    const adminSession = localStorage.getItem('portfolio_admin_session');
+    if (adminSession) {
+      this.setAdminAccess(true);
+    }
+    if (window.location.hash === '#admin') {
+      this.openAdminModal();
+    }
+  }
+
+  // 2. Set Admin Access state
+  setAdminAccess(isAuthenticated) {
+    this.isAdmin = isAuthenticated;
+    const body = document.body;
+    const toggleBtn = document.getElementById('editor-toggle-btn');
+
+    if (isAuthenticated) {
+      body.classList.add('admin-authenticated');
+      if (toggleBtn) {
+        toggleBtn.style.display = 'inline-flex';
+      }
+    } else {
+      body.classList.remove('admin-authenticated');
+      body.classList.remove('editor-active');
+      if (toggleBtn) {
+        toggleBtn.style.display = 'none';
+      }
+      const toolbar = document.getElementById('editor-toolbar');
+      if (toolbar) toolbar.classList.remove('open');
+      this.enableContentEditable(false);
+    }
+  }
+
+  // 3. Hydrate DOM from portfolioData
   autoHydrateDOM() {
     const data = window.portfolioData;
     if (!data) return;
@@ -86,7 +122,7 @@ class PortfolioEditor {
     });
   }
 
-  // 3. Setup Draggable Move Handles on container boxes
+  // 4. Setup Draggable Move Handles on container boxes
   setupDraggableContainers() {
     const containerSelectors = [
       '.hero-content',
@@ -130,7 +166,7 @@ class PortfolioEditor {
     });
   }
 
-  // 4. Setup "Edit Full Case Study" Badges on Project Cards
+  // 5. Setup "Edit Full Case Study" Badges on Project Cards
   setupProjectEditButtons() {
     const projectCards = document.querySelectorAll('.project-card');
     projectCards.forEach((card, index) => {
@@ -155,7 +191,7 @@ class PortfolioEditor {
     });
   }
 
-  // 5. Apply saved positions from localStorage
+  // 6. Apply saved positions from localStorage
   applySavedPositions() {
     Object.keys(this.elementPositions).forEach(id => {
       const el = document.querySelector(`[data-move-id="${id}"]`);
@@ -167,15 +203,15 @@ class PortfolioEditor {
     });
   }
 
-  // 6. Create Editor UI, Toolbar, & Modals
+  // 7. Create Editor UI & Toolbar
   createEditorUI() {
-    // Floating Toggle Button
+    // Floating Toggle Button (visible only when authenticated)
     const toggleBtn = document.createElement('button');
     toggleBtn.id = 'editor-toggle-btn';
     toggleBtn.className = 'editor-floating-btn';
     toggleBtn.setAttribute('aria-label', 'Toggle Live Visual Editor');
     toggleBtn.innerHTML = `
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M12 20h9"></path>
         <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
       </svg>
@@ -191,12 +227,12 @@ class PortfolioEditor {
       <div class="toolbar-brand">
         <span class="live-dot"></span>
         <div class="toolbar-text-group">
-          <strong>Visual Editor Active</strong>
+          <strong>Visual Editor (Admin Active)</strong>
           <small>Click any heading or card to edit | Click "Edit Case Study" on cards | Drag ✥ Move</small>
         </div>
       </div>
       <div class="toolbar-actions">
-        <button id="editor-save-btn" class="editor-btn editor-btn-primary" title="Save changes and positions in browser storage">
+        <button id="editor-save-btn" class="editor-btn editor-btn-primary" title="Save changes in browser storage">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
             <polyline points="17 21 17 13 7 13 7 21"></polyline>
@@ -229,6 +265,14 @@ class PortfolioEditor {
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
           <span>Reset All</span>
+        </button>
+
+        <button id="editor-lock-btn" class="editor-btn editor-btn-danger" title="Lock admin editor and logout">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          <span>Lock / Logout</span>
         </button>
 
         <button id="editor-exit-btn" class="editor-btn editor-btn-close" title="Exit Edit Mode">
@@ -362,7 +406,7 @@ class PortfolioEditor {
     document.body.appendChild(projectModal);
   }
 
-  // 7. Open Full Case Study Editor Modal
+  // 8. Open Full Case Study Editor Modal
   openProjectEditModal(index) {
     this.activeProjectIndex = index;
     const projectList = (window.portfolioData && window.portfolioData.projects && window.portfolioData.projects.list) || [];
@@ -381,7 +425,29 @@ class PortfolioEditor {
     modal.classList.add('open');
   }
 
-  // 8. Bind Events
+  // 9. Open Admin Authentication Modal
+  openAdminModal() {
+    const authModal = document.getElementById('admin-auth-modal');
+    if (authModal) {
+      authModal.classList.add('open');
+      const errEl = document.getElementById('admin-auth-error');
+      if (errEl) errEl.style.display = 'none';
+      const input = document.getElementById('admin-passcode-input');
+      if (input) {
+        input.value = '';
+        setTimeout(() => input.focus(), 150);
+      }
+    }
+  }
+
+  closeAdminModal() {
+    const authModal = document.getElementById('admin-auth-modal');
+    if (authModal) {
+      authModal.classList.remove('open');
+    }
+  }
+
+  // 10. Bind Events
   bindEvents() {
     const toggleBtn = document.getElementById('editor-toggle-btn');
     const saveBtn = document.getElementById('editor-save-btn');
@@ -389,7 +455,16 @@ class PortfolioEditor {
     const resetBtn = document.getElementById('editor-reset-btn');
     const resetLayoutBtn = document.getElementById('editor-reset-layout-btn');
     const exitBtn = document.getElementById('editor-exit-btn');
+    const lockBtn = document.getElementById('editor-lock-btn');
     
+    // Admin Auth Elements
+    const openAdminBtn = document.getElementById('open-admin-login-btn');
+    const adminClose = document.getElementById('admin-auth-close');
+    const btnGoogle = document.getElementById('btn-google-login');
+    const adminForm = document.getElementById('admin-login-form');
+    const adminPasscode = document.getElementById('admin-passcode-input');
+    const adminErr = document.getElementById('admin-auth-error');
+
     // Image Modal
     const imgModal = document.getElementById('editor-img-modal');
     const imgClose = document.getElementById('img-modal-close');
@@ -414,6 +489,76 @@ class PortfolioEditor {
     const pFile = document.getElementById('p-edit-file');
     const pImgUrl = document.getElementById('p-edit-img-url');
     const pImgPreview = document.getElementById('p-edit-img-preview');
+
+    // Admin Auth Triggers
+    if (openAdminBtn) {
+      openAdminBtn.addEventListener('click', () => this.openAdminModal());
+    }
+    if (adminClose) {
+      adminClose.addEventListener('click', () => this.closeAdminModal());
+    }
+
+    // Keyboard Shortcut Ctrl+Shift+E
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'E' || e.key === 'e')) {
+        e.preventDefault();
+        if (this.isAdmin) {
+          this.toggleEditMode();
+        } else {
+          this.openAdminModal();
+        }
+      }
+    });
+
+    // Google Sign-In
+    if (btnGoogle) {
+      btnGoogle.addEventListener('click', async () => {
+        try {
+          adminErr.style.display = 'none';
+          btnGoogle.disabled = true;
+          btnGoogle.querySelector('span').textContent = 'Authenticating...';
+          await window.firebaseAuthManager.signInWithGoogle();
+          this.closeAdminModal();
+          this.setAdminAccess(true);
+          this.toggleEditMode(true);
+          this.showToast('👑 Welcome back, Syed Nabeel Ahmed! Visual Editor unlocked.');
+        } catch (err) {
+          adminErr.textContent = err.message || 'Failed to authenticate with Google.';
+          adminErr.style.display = 'block';
+        } finally {
+          btnGoogle.disabled = false;
+          btnGoogle.querySelector('span').textContent = 'Sign In with Google';
+        }
+      });
+    }
+
+    // Admin Passcode Sign-In
+    if (adminForm) {
+      adminForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        try {
+          adminErr.style.display = 'none';
+          const passcode = adminPasscode.value;
+          window.firebaseAuthManager.signInWithPasscode(passcode);
+          this.closeAdminModal();
+          this.setAdminAccess(true);
+          this.toggleEditMode(true);
+          this.showToast('👑 Admin Passcode Accepted: Visual Editor Unlocked!');
+        } catch (err) {
+          adminErr.textContent = err.message || 'Incorrect passcode.';
+          adminErr.style.display = 'block';
+        }
+      });
+    }
+
+    // Lock / Logout Admin
+    if (lockBtn) {
+      lockBtn.addEventListener('click', async () => {
+        await window.firebaseAuthManager.signOut();
+        this.setAdminAccess(false);
+        this.showToast('🔒 Admin session locked. Editor hidden from visitors.');
+      });
+    }
 
     toggleBtn.addEventListener('click', () => this.toggleEditMode());
     exitBtn.addEventListener('click', () => this.toggleEditMode(false));
@@ -655,6 +800,7 @@ class PortfolioEditor {
           e.target.closest('#editor-img-modal') || 
           e.target.closest('#editor-text-modal') || 
           e.target.closest('#editor-project-card-modal') || 
+          e.target.closest('#admin-auth-modal') || 
           e.target.closest('#editor-toggle-btn') || 
           e.target.closest('#toast-container') ||
           e.target.closest('.card-full-edit-btn')) {
@@ -742,8 +888,14 @@ class PortfolioEditor {
     textInput.select();
   }
 
-  // 9. Toggle visual edit mode
+  // 11. Toggle visual edit mode
   toggleEditMode(forceState = null) {
+    // Require admin authentication to turn on edit mode
+    if (!this.isAdmin) {
+      this.openAdminModal();
+      return;
+    }
+
     this.isEditing = forceState !== null ? forceState : !this.isEditing;
     const body = document.body;
     const toggleBtn = document.getElementById('editor-toggle-btn');
@@ -756,7 +908,7 @@ class PortfolioEditor {
       toggleBtn.classList.add('active');
       btnLabel.textContent = '✏️ Editing Active';
       this.enableContentEditable(true);
-      this.showToast('✏️ Edit Mode Active: Edit text directly, click photos, or click "Edit Case Study" on cards!');
+      this.showToast('👑 Edit Mode Active: Edit text directly, swap photos, or click "Edit Case Study" on cards!');
     } else {
       this.syncDOMToData();
       localStorage.setItem('custom_portfolio_data', JSON.stringify(window.portfolioData));
@@ -766,11 +918,11 @@ class PortfolioEditor {
       toggleBtn.classList.remove('active');
       btnLabel.textContent = '✏️ Edit Mode';
       this.enableContentEditable(false);
-      this.showToast('👁️ Returned to Preview Mode');
+      this.showToast('👁️ Returned to Public Preview Mode');
     }
   }
 
-  // 10. Enable/disable contenteditable on tagged text nodes
+  // 12. Enable/disable contenteditable on tagged text nodes
   enableContentEditable(enable) {
     const editables = document.querySelectorAll('[data-edit-key]');
     editables.forEach(el => {
@@ -784,7 +936,7 @@ class PortfolioEditor {
     });
   }
 
-  // 11. Sync DOM edits into memory window.portfolioData
+  // 13. Sync DOM edits into memory window.portfolioData
   syncDOMToData() {
     const editables = document.querySelectorAll('[data-edit-key]');
     editables.forEach(el => {
@@ -805,7 +957,7 @@ class PortfolioEditor {
     });
   }
 
-  // 12. Helper: set nested property using dot-path notation
+  // 14. Helper: set nested property using dot-path notation
   setNestedValue(obj, path, value) {
     if (!path || !obj) return;
     const keys = path.split('.');
@@ -824,7 +976,7 @@ class PortfolioEditor {
     current[lastKey] = value;
   }
 
-  // 13. Export updated configuration file (portfolio-data.js)
+  // 15. Export updated configuration file (portfolio-data.js)
   exportConfigFile() {
     const jsonString = JSON.stringify(window.portfolioData, null, 2);
     const fileContent = `/**
@@ -848,7 +1000,7 @@ window.portfolioData = ${jsonString};
     this.showToast('📥 Downloaded updated portfolio-data.js!');
   }
 
-  // 14. Toast notification helper
+  // 16. Toast notification helper
   showToast(message) {
     let container = document.getElementById('toast-container');
     if (!container) {
