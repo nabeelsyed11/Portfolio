@@ -3,6 +3,12 @@
 Thumbs.db
 desktop.ini
 
+# Private & Sensitive Configuration
+firebase-config.js
+*.local.js
+.env
+.env.local
+
 # IDE & Editor files
 .vscode/
 .idea/
@@ -14,5 +20,5 @@ desktop.ini
 npm-debug.log*
 yarn-debug.log*
 
-# Node modules (if ever added)
+# Node modules
 node_modules/

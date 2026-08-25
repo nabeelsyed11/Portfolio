@@ -510,6 +510,42 @@ class PortfolioEditor {
       }
     });
 
+    // In-browser private Firebase config toggle & save
+    const toggleFbBtn = document.getElementById('toggle-firebase-setup-btn');
+    const fbPanel = document.getElementById('firebase-setup-panel');
+    const fbSaveBtn = document.getElementById('save-browser-firebase-btn');
+    const fbApiKeyInput = document.getElementById('fb-api-key-input');
+    const fbProjectIdInput = document.getElementById('fb-project-id-input');
+
+    if (toggleFbBtn && fbPanel) {
+      toggleFbBtn.addEventListener('click', () => {
+        const isHidden = fbPanel.style.display === 'none';
+        fbPanel.style.display = isHidden ? 'flex' : 'none';
+      });
+    }
+
+    if (fbSaveBtn) {
+      fbSaveBtn.addEventListener('click', () => {
+        const apiKey = fbApiKeyInput.value.trim();
+        const projectId = fbProjectIdInput.value.trim();
+        if (apiKey && projectId) {
+          const cfg = {
+            apiKey: apiKey,
+            authDomain: `${projectId}.firebaseapp.com`,
+            projectId: projectId,
+            storageBucket: `${projectId}.appspot.com`
+          };
+          localStorage.setItem('portfolio_firebase_config', JSON.stringify(cfg));
+          this.showToast('✅ Firebase credentials saved privately in your browser storage (Zero Git exposure)!');
+          fbPanel.style.display = 'none';
+          window.location.reload();
+        } else {
+          adminErr.textContent = 'Please enter both API Key and Project ID.';
+          adminErr.style.display = 'block';
+        }
+      });
+    }
+
     // Google Sign-In
     if (btnGoogle) {
       btnGoogle.addEventListener('click', async () => {

@@ -549,6 +549,30 @@
             Unlock Visual Editor
           </button>
         </form>
+
+        <!-- Option 3: Connect Private Firebase Keys (Browser-Only, Never Stored in Git) -->
+        <div class="firebase-private-config-accordion">
+          <button type="button" id="toggle-firebase-setup-btn" class="btn-toggle-private-config">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+            <span>Custom Firebase Project Keys (Private In-Browser)</span>
+          </button>
+          <div id="firebase-setup-panel" class="firebase-setup-panel" style="display: none;">
+            <div class="editor-form-group">
+              <label for="fb-api-key-input">Firebase API Key</label>
+              <input type="text" id="fb-api-key-input" class="editor-input" placeholder="AIzaSy...">
+            </div>
+            <div class="editor-form-group">
+              <label for="fb-project-id-input">Firebase Project ID</label>
+              <input type="text" id="fb-project-id-input" class="editor-input" placeholder="e.g. portfolio-syed-nabeel">
+            </div>
+            <button type="button" id="save-browser-firebase-btn" class="editor-btn editor-btn-secondary" style="margin-top: 0.5rem; width: 100%; justify-content: center;">
+              Save to Browser Storage (Zero Git Exposure)
+            </button>
+          </div>
+        </div>
       </div>
 
       <div class="editor-modal-footer admin-auth-footer">

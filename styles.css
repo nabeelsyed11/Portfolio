@@ -1410,6 +1410,42 @@ body.editor-active .editor-floating-btn {
   margin-top: 0.5rem;
 }
 
+.firebase-private-config-accordion {
+  margin-top: 1.25rem;
+  border-top: 1px dashed var(--border-color);
+  padding-top: 1rem;
+}
+
+.btn-toggle-private-config {
+  background: none;
+  border: none;
+  color: var(--accent-green);
+  font-size: 0.82rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  cursor: pointer;
+  padding: 0.4rem 0;
+  transition: opacity var(--transition-fast);
+}
+
+.btn-toggle-private-config:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+.firebase-setup-panel {
+  margin-top: 0.85rem;
+  background-color: var(--bg-subtle);
+  padding: 1rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
 .admin-auth-footer {
   justify-content: center !important;
   color: var(--text-muted);
