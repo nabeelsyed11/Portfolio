@@ -1253,40 +1253,9 @@ section {
    LIVE VISUAL EDITOR STYLES & INTERFACE
    ========================================================================== */
 
-/* Floating Edit Mode Button (Hidden until Admin authenticates) */
+/* Floating Edit Mode Button (Disabled to keep view clean) */
 .editor-floating-btn {
-  display: none;
-  position: fixed;
-  bottom: 2rem;
-  left: 2rem;
-  z-index: 2500;
-  background-color: #1e3b2b;
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: var(--radius-pill);
-  padding: 0.75rem 1.4rem;
-  align-items: center;
-  gap: 0.6rem;
-  font-size: 0.9rem;
-  font-weight: 600;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
-  transition: all var(--transition-fast);
-}
-
-body.admin-authenticated .editor-floating-btn,
-body.editor-active .editor-floating-btn {
-  display: inline-flex;
-}
-
-.editor-floating-btn:hover {
-  background-color: #2b543d;
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
-}
-
-.editor-floating-btn.active {
-  background-color: #3f7051;
-  border-color: #a8c7b0;
+  display: none !important;
 }
 
 /* Footer Bottom Row & Admin Portal Link */
@@ -1464,38 +1433,53 @@ body.editor-active .editor-floating-btn {
 /* Floating Action Toolbar */
 .editor-toolbar-panel {
   position: fixed;
-  bottom: -100px;
+  bottom: -120px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 2600;
-  background-color: #183324;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: var(--radius-pill);
-  padding: 0.6rem 1.25rem;
+  background-color: #12281c;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 9999px;
+  padding: 0.45rem 0.9rem;
   display: flex;
+  flex-direction: row;
   align-items: center;
-  gap: 1.5rem;
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  gap: 0.85rem;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   opacity: 0;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+  width: auto;
+  max-width: 95vw;
+  transition: bottom 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
   pointer-events: none;
 }
 
 .editor-toolbar-panel.open {
-  bottom: 2rem;
+  bottom: 1.75rem;
   opacity: 1;
   pointer-events: auto;
 }
 
 .toolbar-brand {
   display: flex;
+  flex-direction: row;
   align-items: center;
   gap: 0.5rem;
   color: #e5f2e8;
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding-left: 0.25rem;
+  padding-right: 0.65rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.toolbar-title {
+  white-space: nowrap;
 }
 
 .live-dot {
@@ -1505,6 +1489,7 @@ body.editor-active .editor-floating-btn {
   background-color: #55d47e;
   box-shadow: 0 0 10px #55d47e;
   animation: pulse 1.8s infinite;
+  flex-shrink: 0;
 }
 
 @keyframes pulse {
@@ -1514,19 +1499,32 @@ body.editor-active .editor-floating-btn {
 
 .toolbar-actions {
   display: flex;
+  flex-direction: row;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.45rem;
+  white-space: nowrap;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
 }
 
 .editor-btn {
   display: inline-flex;
+  flex-direction: row;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius-pill);
-  font-size: 0.85rem;
+  gap: 0.35rem;
+  padding: 0.45rem 0.8rem;
+  border-radius: 9999px;
+  font-size: 0.82rem;
   font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
   transition: all var(--transition-fast);
+  cursor: pointer;
+  border: none;
+}
+
+.editor-btn svg {
+  flex-shrink: 0;
 }
 
 .editor-btn-primary {
@@ -1560,13 +1558,26 @@ body.editor-active .editor-floating-btn {
 }
 
 .editor-btn-close {
+  background: none;
   color: #a3b8aa;
-  padding: 0.4rem 0.6rem;
-  font-size: 1.1rem;
+  padding: 0.4rem 0.65rem;
+  font-size: 0.82rem;
 }
 
 .editor-btn-close:hover {
   color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 860px) {
+  .editor-toolbar-panel {
+    border-radius: var(--radius-lg);
+    padding: 0.5rem 0.75rem;
+    overflow-x: auto;
+    max-width: 96vw;
+    gap: 0.5rem;
+    justify-content: flex-start;
+  }
 }
 
 /* Move & Drag Handle for Boxes and Text in Edit Mode */

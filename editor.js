@@ -205,20 +205,6 @@ class PortfolioEditor {
 
   // 7. Create Editor UI & Toolbar
   createEditorUI() {
-    // Floating Toggle Button (visible only when authenticated)
-    const toggleBtn = document.createElement('button');
-    toggleBtn.id = 'editor-toggle-btn';
-    toggleBtn.className = 'editor-floating-btn';
-    toggleBtn.setAttribute('aria-label', 'Toggle Live Visual Editor');
-    toggleBtn.innerHTML = `
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M12 20h9"></path>
-        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-      </svg>
-      <span id="editor-btn-label">✏️ Edit Mode</span>
-    `;
-    document.body.appendChild(toggleBtn);
-
     // Floating Action Toolbar
     const toolbar = document.createElement('div');
     toolbar.id = 'editor-toolbar';
@@ -226,14 +212,11 @@ class PortfolioEditor {
     toolbar.innerHTML = `
       <div class="toolbar-brand">
         <span class="live-dot"></span>
-        <div class="toolbar-text-group">
-          <strong>Visual Editor (Admin Active)</strong>
-          <small>Click any heading or card to edit | Click "Edit Case Study" on cards | Drag ✥ Move</small>
-        </div>
+        <span class="toolbar-title">Editor Active</span>
       </div>
       <div class="toolbar-actions">
         <button id="editor-save-btn" class="editor-btn editor-btn-primary" title="Save changes in browser storage">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
             <polyline points="17 21 17 13 7 13 7 21"></polyline>
             <polyline points="7 3 7 8 15 8"></polyline>
@@ -242,7 +225,7 @@ class PortfolioEditor {
         </button>
 
         <button id="editor-reset-layout-btn" class="editor-btn editor-btn-secondary" title="Reset all moved positions back to default">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="23 4 23 10 17 10"></polyline>
             <polyline points="1 20 1 14 7 14"></polyline>
             <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
@@ -251,7 +234,7 @@ class PortfolioEditor {
         </button>
 
         <button id="editor-export-btn" class="editor-btn editor-btn-secondary" title="Download updated portfolio-data.js file">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
             <polyline points="7 10 12 15 17 10"></polyline>
             <line x1="12" y1="15" x2="12" y2="3"></line>
@@ -260,7 +243,7 @@ class PortfolioEditor {
         </button>
 
         <button id="editor-reset-btn" class="editor-btn editor-btn-danger" title="Revert to original default content">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
@@ -268,11 +251,11 @@ class PortfolioEditor {
         </button>
 
         <button id="editor-lock-btn" class="editor-btn editor-btn-danger" title="Lock admin editor and logout">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
             <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
           </svg>
-          <span>Lock / Logout</span>
+          <span>Lock</span>
         </button>
 
         <button id="editor-exit-btn" class="editor-btn editor-btn-close" title="Exit Edit Mode">
@@ -609,8 +592,12 @@ class PortfolioEditor {
       });
     }
 
-    toggleBtn.addEventListener('click', () => this.toggleEditMode());
-    exitBtn.addEventListener('click', () => this.toggleEditMode(false));
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', () => this.toggleEditMode());
+    }
+    if (exitBtn) {
+      exitBtn.addEventListener('click', () => this.toggleEditMode(false));
+    }
 
     saveBtn.addEventListener('click', () => {
       this.syncDOMToData();
@@ -947,15 +934,11 @@ class PortfolioEditor {
 
     this.isEditing = forceState !== null ? forceState : !this.isEditing;
     const body = document.body;
-    const toggleBtn = document.getElementById('editor-toggle-btn');
     const toolbar = document.getElementById('editor-toolbar');
-    const btnLabel = document.getElementById('editor-btn-label');
 
     if (this.isEditing) {
       body.classList.add('editor-active');
-      toolbar.classList.add('open');
-      toggleBtn.classList.add('active');
-      btnLabel.textContent = '✏️ Editing Active';
+      if (toolbar) toolbar.classList.add('open');
       this.enableContentEditable(true);
       this.showToast('👑 Edit Mode Active: Edit text directly, swap photos, or click "Edit Case Study" on cards!');
     } else {
@@ -963,9 +946,7 @@ class PortfolioEditor {
       localStorage.setItem('custom_portfolio_data', JSON.stringify(window.portfolioData));
       localStorage.setItem('portfolio_element_positions', JSON.stringify(this.elementPositions));
       body.classList.remove('editor-active');
-      toolbar.classList.remove('open');
-      toggleBtn.classList.remove('active');
-      btnLabel.textContent = '✏️ Edit Mode';
+      if (toolbar) toolbar.classList.remove('open');
       this.enableContentEditable(false);
       this.showToast('👁️ Returned to Public Preview Mode');
     }
