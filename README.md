@@ -26,6 +26,8 @@ python -m http.server 3000
 ```
 Then open [http://localhost:3000](http://localhost:3000) in your browser.
 
+http://nabeelsyed11.github.io/Portfolio/
+
 ### 2. Live On-Page Editing
 1. Open the website in your browser.
 2. Click the floating **"✏️ Edit Mode"** button in the bottom-left corner.
