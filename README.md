@@ -2,7 +2,7 @@
 
 A modern, responsive, and fully editable portfolio website built for **Syed Nabeel Ahmed**.
 
-![Portfolio Preview](assets/images/syed-nabeel-ahmed.jpg)
+![Portfolio Preview](assets/images/Web-name.jpg)
 
 ---
 
