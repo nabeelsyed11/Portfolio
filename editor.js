@@ -1,9 +1,12 @@
 /**
  * ==============================================================================
- * PORTFOLIO LIVE VISUAL EDITOR (CMS ENGINE 3.0 - WITH DRAG & MOVE)
+ * PORTFOLIO LIVE VISUAL EDITOR (CMS ENGINE 4.0 - ADVANCED TEXT & DRAG EDITOR)
  * ==============================================================================
- * Enables live in-browser editing of text, photo replacements, AND
- * freeform Drag & Move repositioning of boxes, text blocks, and cards.
+ * Guarantees 100% smooth text and heading editing:
+ * 1. Direct inline typing with auto-focus and instant visual sync.
+ * 2. Dedicated Text Edit Modal for modifying any heading/text in an input box.
+ * 3. Photo replacement modal with file upload and preview.
+ * 4. Freeform Drag & Move for container boxes and cards.
  * ==============================================================================
  */
 
@@ -11,6 +14,7 @@ class PortfolioEditor {
   constructor() {
     this.isEditing = false;
     this.activeImgTarget = null;
+    this.activeTextTarget = null;
     this.isDragging = false;
     this.currentDragEl = null;
     this.dragStartX = 0;
@@ -23,7 +27,7 @@ class PortfolioEditor {
     this.createEditorUI();
     this.bindEvents();
     this.autoHydrateDOM();
-    this.setupDraggableElements();
+    this.setupDraggableContainers();
     this.applySavedPositions();
   }
 
@@ -80,42 +84,36 @@ class PortfolioEditor {
     });
   }
 
-  // 3. Setup Draggable Move Handles on all movable boxes and text blocks
-  setupDraggableElements() {
-    const movableSelectors = [
+  // 3. Setup Draggable Move Handles ONLY on container cards & boxes (never on text!)
+  setupDraggableContainers() {
+    const containerSelectors = [
       '.hero-content',
       '.hero-visual',
-      '.hero-title',
-      '.hero-desc',
-      '.hero-actions',
       '.about-visual',
       '.about-content',
       '.about-card',
-      '.connect-profiles-block',
       '.skills-content',
       '.skills-visual',
       '.skill-card',
       '.project-card',
-      '.projects-header-left',
-      '.projects-header-right',
       '.contact-left',
       '.contact-card'
     ];
 
     let idx = 0;
-    movableSelectors.forEach(sel => {
+    containerSelectors.forEach(sel => {
       document.querySelectorAll(sel).forEach(el => {
         if (!el.getAttribute('data-move-id')) {
-          el.setAttribute('data-move-id', `move_${el.className.split(' ')[0]}_${idx++}`);
+          el.setAttribute('data-move-id', `container_${el.className.split(' ')[0]}_${idx++}`);
         }
 
-        // Add Move Handle if not already present
+        // Add Move Handle only if not present and element is NOT a text node
         if (!el.querySelector(':scope > .move-drag-handle')) {
           const handle = document.createElement('div');
           handle.className = 'move-drag-handle';
-          handle.setAttribute('title', 'Drag to move this box/text');
+          handle.setAttribute('title', 'Drag to move this section/card');
           handle.innerHTML = `
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <polyline points="5 9 2 12 5 15"></polyline>
               <polyline points="9 5 12 2 15 5"></polyline>
               <polyline points="15 19 12 22 9 19"></polyline>
@@ -143,7 +141,7 @@ class PortfolioEditor {
     });
   }
 
-  // 5. Create Editor UI & Toolbar
+  // 5. Create Editor UI, Toolbar, Image Modal & Text Edit Modal
   createEditorUI() {
     // Floating Toggle Button
     const toggleBtn = document.createElement('button');
@@ -168,7 +166,7 @@ class PortfolioEditor {
         <span class="live-dot"></span>
         <div class="toolbar-text-group">
           <strong>Visual Editor Active</strong>
-          <small>Click any text to type, swap photos, or drag ✥ Move to reposition boxes</small>
+          <small>Click any heading or text to edit | Double-click for Edit Popup | Drag ✥ Move to reposition</small>
         </div>
       </div>
       <div class="toolbar-actions">
@@ -245,9 +243,36 @@ class PortfolioEditor {
       </div>
     `;
     document.body.appendChild(imgModal);
+
+    // Dedicated Heading & Text Editor Modal
+    const textModal = document.createElement('div');
+    textModal.id = 'editor-text-modal';
+    textModal.className = 'editor-modal-backdrop';
+    textModal.innerHTML = `
+      <div class="editor-modal-card">
+        <div class="editor-modal-header">
+          <h3 id="text-modal-title">✏️ Edit Heading / Text</h3>
+          <button id="text-modal-close" class="editor-modal-close" aria-label="Close modal">&times;</button>
+        </div>
+        <div class="editor-modal-body">
+          <div class="editor-form-group">
+            <label id="text-modal-field-label">Content:</label>
+            <textarea id="text-modal-input" class="editor-textarea" rows="4" placeholder="Enter your text here..."></textarea>
+            <small id="text-modal-hint" style="color: var(--text-muted); display: block; margin-top: 0.4rem;">
+              You can type text freely. To add a line break in titles, press Enter.
+            </small>
+          </div>
+        </div>
+        <div class="editor-modal-footer">
+          <button id="text-modal-cancel" class="editor-btn editor-btn-secondary">Cancel</button>
+          <button id="text-modal-apply" class="editor-btn editor-btn-primary">Apply Text</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(textModal);
   }
 
-  // 6. Bind Drag, Click, and Form Events
+  // 6. Bind Events
   bindEvents() {
     const toggleBtn = document.getElementById('editor-toggle-btn');
     const saveBtn = document.getElementById('editor-save-btn');
@@ -256,7 +281,7 @@ class PortfolioEditor {
     const resetLayoutBtn = document.getElementById('editor-reset-layout-btn');
     const exitBtn = document.getElementById('editor-exit-btn');
     
-    // Image modal elements
+    // Image Modal
     const imgModal = document.getElementById('editor-img-modal');
     const imgClose = document.getElementById('img-modal-close');
     const imgCancel = document.getElementById('img-modal-cancel');
@@ -265,6 +290,14 @@ class PortfolioEditor {
     const imgUrlInput = document.getElementById('img-modal-url');
     const imgPreview = document.getElementById('img-modal-preview');
 
+    // Text Modal
+    const textModal = document.getElementById('editor-text-modal');
+    const textClose = document.getElementById('text-modal-close');
+    const textCancel = document.getElementById('text-modal-cancel');
+    const textApply = document.getElementById('text-modal-apply');
+    const textInput = document.getElementById('text-modal-input');
+    const textLabel = document.getElementById('text-modal-field-label');
+
     toggleBtn.addEventListener('click', () => this.toggleEditMode());
     exitBtn.addEventListener('click', () => this.toggleEditMode(false));
 
@@ -272,7 +305,7 @@ class PortfolioEditor {
       this.syncDOMToData();
       localStorage.setItem('custom_portfolio_data', JSON.stringify(window.portfolioData));
       localStorage.setItem('portfolio_element_positions', JSON.stringify(this.elementPositions));
-      this.showToast('✅ All edits, photos, and moved layout positions saved!');
+      this.showToast('✅ All text edits, photos, and moved layout positions saved!');
     });
 
     resetLayoutBtn.addEventListener('click', () => {
@@ -297,15 +330,22 @@ class PortfolioEditor {
       }
     });
 
-    // Image Modal events
+    // Close Modals
     const closeImgModal = () => {
       imgModal.classList.remove('open');
       this.activeImgTarget = null;
     };
-
     imgClose.addEventListener('click', closeImgModal);
     imgCancel.addEventListener('click', closeImgModal);
 
+    const closeTextModal = () => {
+      textModal.classList.remove('open');
+      this.activeTextTarget = null;
+    };
+    textClose.addEventListener('click', closeTextModal);
+    textCancel.addEventListener('click', closeTextModal);
+
+    // Apply Photo
     imgFileInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (file) {
@@ -333,6 +373,30 @@ class PortfolioEditor {
         }
         this.showToast('✅ Photo updated successfully!');
         closeImgModal();
+      }
+    });
+
+    // Apply Text Modal
+    textApply.addEventListener('click', () => {
+      if (this.activeTextTarget) {
+        let val = textInput.value;
+        const key = this.activeTextTarget.getAttribute('data-edit-key');
+        const isHTML = this.activeTextTarget.getAttribute('data-is-html') === 'true';
+
+        if (isHTML) {
+          val = val.replace(/\n/g, '<br>');
+          this.activeTextTarget.innerHTML = val;
+        } else {
+          this.activeTextTarget.textContent = val;
+        }
+
+        if (key) {
+          this.setNestedValue(window.portfolioData, key, val);
+          localStorage.setItem('custom_portfolio_data', JSON.stringify(window.portfolioData));
+        }
+
+        this.showToast('✅ Heading / Text updated!');
+        closeTextModal();
       }
     });
 
@@ -393,11 +457,26 @@ class PortfolioEditor {
       }
     });
 
-    // Universal Click Interceptor for Edit Mode
+    // Double-Click to open Text Edit Modal on any heading or text
+    document.addEventListener('dblclick', (e) => {
+      if (!this.isEditing) return;
+      const editable = e.target.closest('[data-edit-key]');
+      if (editable) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.openTextModal(editable);
+      }
+    });
+
+    // Click handler in Edit Mode
     document.addEventListener('click', (e) => {
       if (!this.isEditing) return;
 
-      if (e.target.closest('#editor-toolbar') || e.target.closest('#editor-img-modal') || e.target.closest('#editor-toggle-btn') || e.target.closest('#toast-container')) {
+      if (e.target.closest('#editor-toolbar') || 
+          e.target.closest('#editor-img-modal') || 
+          e.target.closest('#editor-text-modal') || 
+          e.target.closest('#editor-toggle-btn') || 
+          e.target.closest('#toast-container')) {
         return;
       }
 
@@ -433,6 +512,7 @@ class PortfolioEditor {
         if (parentAnchor && !parentAnchor.classList.contains('editor-btn')) {
           e.preventDefault();
         }
+        // Focus and select text for effortless typing
         editable.focus();
         return;
       }
@@ -441,9 +521,9 @@ class PortfolioEditor {
       if (anyAnchor) {
         e.preventDefault();
       }
-    }, true);
+    });
 
-    // Auto-save text inputs in real-time
+    // Real-time live synchronization while typing
     document.addEventListener('input', (e) => {
       if (!this.isEditing) return;
       const editable = e.target.closest('[data-edit-key]');
@@ -465,6 +545,23 @@ class PortfolioEditor {
     }, true);
   }
 
+  // Open the Text Modal for convenient editing
+  openTextModal(el) {
+    this.activeTextTarget = el;
+    const textModal = document.getElementById('editor-text-modal');
+    const textInput = document.getElementById('text-modal-input');
+    const textLabel = document.getElementById('text-modal-field-label');
+    const key = el.getAttribute('data-edit-key') || 'Field';
+    const isHTML = el.getAttribute('data-is-html') === 'true';
+
+    textLabel.textContent = `Edit "${key}":`;
+    let rawText = isHTML ? el.innerHTML.replace(/<br\s*[\/]?>/gi, '\n') : el.innerText;
+    textInput.value = rawText;
+    textModal.classList.add('open');
+    textInput.focus();
+    textInput.select();
+  }
+
   // 7. Toggle visual edit mode
   toggleEditMode(forceState = null) {
     this.isEditing = forceState !== null ? forceState : !this.isEditing;
@@ -479,7 +576,7 @@ class PortfolioEditor {
       toggleBtn.classList.add('active');
       btnLabel.textContent = '✏️ Editing Active';
       this.enableContentEditable(true);
-      this.showToast('✏️ Edit Mode ON: Click any text to type, or drag ✥ Move to reposition boxes!');
+      this.showToast('✏️ Edit Mode Active: Click any heading/text to type directly, or double-click for Edit Popup!');
     } else {
       this.syncDOMToData();
       localStorage.setItem('custom_portfolio_data', JSON.stringify(window.portfolioData));
@@ -500,7 +597,7 @@ class PortfolioEditor {
       el.contentEditable = enable ? 'true' : 'false';
       el.spellcheck = false;
       if (enable) {
-        el.setAttribute('title', 'Click to edit text');
+        el.setAttribute('title', 'Click to type, or double-click for Edit Popup');
       } else {
         el.removeAttribute('title');
       }

@@ -1489,18 +1489,24 @@ body.editor-active .project-img-frame:hover .img-edit-overlay {
   color: var(--text-heading);
 }
 
-.editor-input {
+.editor-input,
+.editor-textarea {
   width: 100%;
   padding: 0.75rem 1rem;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
-  font-size: 0.9rem;
+  font-size: 0.95rem;
+  font-family: var(--font-sans);
   outline: none;
+  background-color: var(--bg-card);
+  color: var(--text-heading);
+  resize: vertical;
 }
 
-.editor-input:focus {
+.editor-input:focus,
+.editor-textarea:focus {
   border-color: var(--accent-green);
-  box-shadow: 0 0 0 3px rgba(53, 93, 68, 0.12);
+  box-shadow: 0 0 0 3px rgba(53, 93, 68, 0.15);
 }
 
 .editor-file-input {
