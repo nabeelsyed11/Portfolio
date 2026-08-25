@@ -52,7 +52,7 @@ window.portfolioData = {
     socialLinks: [
       {
         name: "LinkedIn",
-        url: "https://linkedin.com",
+        url: "https://www.linkedin.com/in/syednabeelahmed1",
         iconType: "linkedin"
       },
       {
@@ -62,7 +62,7 @@ window.portfolioData = {
       },
       {
         name: "Instagram",
-        url: "https://instagram.com",
+        url: "https://www.instagram.com/nabeelsyed_/",
         iconType: "instagram"
       },
       {

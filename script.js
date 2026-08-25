@@ -127,18 +127,37 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('scroll', handleScroll, { passive: true });
   handleScroll();
 
-  // 4. Mobile menu toggle
+  // 4. Smooth Anchor Scrolling & Mobile menu toggle
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+      const hash = this.getAttribute('href');
+      if (!hash || hash === '#' || hash === '#admin') return;
+
+      const targetEl = document.querySelector(hash);
+      if (targetEl) {
+        e.preventDefault();
+        const headerOffset = 80;
+        const elementPosition = targetEl.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
+
+        // Close mobile menu if open
+        if (navMenu && navMenu.classList.contains('open')) {
+          navMenu.classList.remove('open');
+        }
+      }
+    });
+  });
+
   if (mobileToggle && navMenu) {
     mobileToggle.addEventListener('click', () => {
       navMenu.classList.toggle('open');
       const isExpanded = navMenu.classList.contains('open');
       mobileToggle.setAttribute('aria-expanded', isExpanded);
-    });
-
-    document.querySelectorAll('.nav-menu a').forEach(link => {
-      link.addEventListener('click', () => {
-        navMenu.classList.remove('open');
-      });
     });
   }
 
