@@ -1,10 +1,9 @@
 /**
  * ==============================================================================
- * PORTFOLIO LIVE VISUAL EDITOR (CMS ENGINE 2.0)
+ * PORTFOLIO LIVE VISUAL EDITOR (CMS ENGINE 3.0 - WITH DRAG & MOVE)
  * ==============================================================================
- * Comprehensive real-time visual editor allowing live on-screen editing of
- * ALL headings, sub-headings, paragraphs, tags, badges, buttons, links,
- * and photos with instant preview, image uploads, and localStorage persistence.
+ * Enables live in-browser editing of text, photo replacements, AND
+ * freeform Drag & Move repositioning of boxes, text blocks, and cards.
  * ==============================================================================
  */
 
@@ -12,10 +11,20 @@ class PortfolioEditor {
   constructor() {
     this.isEditing = false;
     this.activeImgTarget = null;
+    this.isDragging = false;
+    this.currentDragEl = null;
+    this.dragStartX = 0;
+    this.dragStartY = 0;
+    this.elStartX = 0;
+    this.elStartY = 0;
+    this.elementPositions = {};
+
     this.initStorage();
     this.createEditorUI();
     this.bindEvents();
     this.autoHydrateDOM();
+    this.setupDraggableElements();
+    this.applySavedPositions();
   }
 
   // 1. Initialize local storage or fallback to default portfolioData
@@ -25,9 +34,17 @@ class PortfolioEditor {
       try {
         const parsed = JSON.parse(saved);
         window.portfolioData = Object.assign({}, window.portfolioData, parsed);
-        console.log('Loaded customized portfolio data from localStorage.');
       } catch (e) {
         console.error('Failed to parse saved portfolio data:', e);
+      }
+    }
+
+    const savedPositions = localStorage.getItem('portfolio_element_positions');
+    if (savedPositions) {
+      try {
+        this.elementPositions = JSON.parse(savedPositions);
+      } catch (e) {
+        console.error('Failed to parse saved positions:', e);
       }
     }
   }
@@ -63,7 +80,70 @@ class PortfolioEditor {
     });
   }
 
-  // 3. Create the floating Edit Mode button, Toolbar, and Image Modal
+  // 3. Setup Draggable Move Handles on all movable boxes and text blocks
+  setupDraggableElements() {
+    const movableSelectors = [
+      '.hero-content',
+      '.hero-visual',
+      '.hero-title',
+      '.hero-desc',
+      '.hero-actions',
+      '.about-visual',
+      '.about-content',
+      '.about-card',
+      '.connect-profiles-block',
+      '.skills-content',
+      '.skills-visual',
+      '.skill-card',
+      '.project-card',
+      '.projects-header-left',
+      '.projects-header-right',
+      '.contact-left',
+      '.contact-card'
+    ];
+
+    let idx = 0;
+    movableSelectors.forEach(sel => {
+      document.querySelectorAll(sel).forEach(el => {
+        if (!el.getAttribute('data-move-id')) {
+          el.setAttribute('data-move-id', `move_${el.className.split(' ')[0]}_${idx++}`);
+        }
+
+        // Add Move Handle if not already present
+        if (!el.querySelector(':scope > .move-drag-handle')) {
+          const handle = document.createElement('div');
+          handle.className = 'move-drag-handle';
+          handle.setAttribute('title', 'Drag to move this box/text');
+          handle.innerHTML = `
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="5 9 2 12 5 15"></polyline>
+              <polyline points="9 5 12 2 15 5"></polyline>
+              <polyline points="15 19 12 22 9 19"></polyline>
+              <polyline points="19 9 22 12 19 15"></polyline>
+              <line x1="2" y1="12" x2="22" y2="12"></line>
+              <line x1="12" y1="2" x2="12" y2="22"></line>
+            </svg>
+            <span>Move</span>
+          `;
+          el.appendChild(handle);
+        }
+      });
+    });
+  }
+
+  // 4. Apply saved positions from localStorage
+  applySavedPositions() {
+    Object.keys(this.elementPositions).forEach(id => {
+      const el = document.querySelector(`[data-move-id="${id}"]`);
+      if (el) {
+        const pos = this.elementPositions[id];
+        el.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`;
+        el.style.position = 'relative';
+      }
+    });
+  }
+
+  // 5. Create Editor UI & Toolbar
   createEditorUI() {
     // Floating Toggle Button
     const toggleBtn = document.createElement('button');
@@ -88,17 +168,26 @@ class PortfolioEditor {
         <span class="live-dot"></span>
         <div class="toolbar-text-group">
           <strong>Visual Editor Active</strong>
-          <small>Click any text to type, or click any photo to replace</small>
+          <small>Click any text to type, swap photos, or drag ✥ Move to reposition boxes</small>
         </div>
       </div>
       <div class="toolbar-actions">
-        <button id="editor-save-btn" class="editor-btn editor-btn-primary" title="Save changes in browser storage">
+        <button id="editor-save-btn" class="editor-btn editor-btn-primary" title="Save changes and positions in browser storage">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
             <polyline points="17 21 17 13 7 13 7 21"></polyline>
             <polyline points="7 3 7 8 15 8"></polyline>
           </svg>
           <span>Save Changes</span>
+        </button>
+
+        <button id="editor-reset-layout-btn" class="editor-btn editor-btn-secondary" title="Reset all moved positions back to default">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <polyline points="1 20 1 14 7 14"></polyline>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+          </svg>
+          <span>Reset Layout</span>
         </button>
 
         <button id="editor-export-btn" class="editor-btn editor-btn-secondary" title="Download updated portfolio-data.js file">
@@ -112,11 +201,10 @@ class PortfolioEditor {
 
         <button id="editor-reset-btn" class="editor-btn editor-btn-danger" title="Revert to original default content">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="1 4 1 10 7 10"></polyline>
-            <polyline points="23 20 23 14 17 14"></polyline>
-            <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path>
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
-          <span>Reset</span>
+          <span>Reset All</span>
         </button>
 
         <button id="editor-exit-btn" class="editor-btn editor-btn-close" title="Exit Edit Mode">
@@ -159,12 +247,13 @@ class PortfolioEditor {
     document.body.appendChild(imgModal);
   }
 
-  // 4. Bind events
+  // 6. Bind Drag, Click, and Form Events
   bindEvents() {
     const toggleBtn = document.getElementById('editor-toggle-btn');
     const saveBtn = document.getElementById('editor-save-btn');
     const exportBtn = document.getElementById('editor-export-btn');
     const resetBtn = document.getElementById('editor-reset-btn');
+    const resetLayoutBtn = document.getElementById('editor-reset-layout-btn');
     const exitBtn = document.getElementById('editor-exit-btn');
     
     // Image modal elements
@@ -182,7 +271,17 @@ class PortfolioEditor {
     saveBtn.addEventListener('click', () => {
       this.syncDOMToData();
       localStorage.setItem('custom_portfolio_data', JSON.stringify(window.portfolioData));
-      this.showToast('✅ All edits and images saved to browser storage!');
+      localStorage.setItem('portfolio_element_positions', JSON.stringify(this.elementPositions));
+      this.showToast('✅ All edits, photos, and moved layout positions saved!');
+    });
+
+    resetLayoutBtn.addEventListener('click', () => {
+      this.elementPositions = {};
+      localStorage.removeItem('portfolio_element_positions');
+      document.querySelectorAll('[data-move-id]').forEach(el => {
+        el.style.transform = '';
+      });
+      this.showToast('🔄 Layout positions reset to default alignment!');
     });
 
     exportBtn.addEventListener('click', () => {
@@ -191,8 +290,9 @@ class PortfolioEditor {
     });
 
     resetBtn.addEventListener('click', () => {
-      if (confirm('Are you sure you want to reset all content and photos back to original defaults?')) {
+      if (confirm('Are you sure you want to reset all content, photos, and layout positions back to original defaults?')) {
         localStorage.removeItem('custom_portfolio_data');
+        localStorage.removeItem('portfolio_element_positions');
         window.location.reload();
       }
     });
@@ -236,16 +336,79 @@ class PortfolioEditor {
       }
     });
 
+    // --- DRAG & MOVE INTERACTION ENGINE ---
+    document.addEventListener('mousedown', (e) => {
+      if (!this.isEditing) return;
+
+      const handle = e.target.closest('.move-drag-handle');
+      if (handle) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const parentEl = handle.closest('[data-move-id]');
+        if (!parentEl) return;
+
+        this.isDragging = true;
+        this.currentDragEl = parentEl;
+        this.currentDragEl.classList.add('is-dragging');
+
+        this.dragStartX = e.clientX;
+        this.dragStartY = e.clientY;
+
+        const moveId = parentEl.getAttribute('data-move-id');
+        const currentPos = this.elementPositions[moveId] || { x: 0, y: 0 };
+        this.elStartX = currentPos.x;
+        this.elStartY = currentPos.y;
+
+        document.body.style.cursor = 'grabbing';
+      }
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!this.isDragging || !this.currentDragEl) return;
+
+      e.preventDefault();
+      const dx = e.clientX - this.dragStartX;
+      const dy = e.clientY - this.dragStartY;
+
+      const newX = Math.round(this.elStartX + dx);
+      const newY = Math.round(this.elStartY + dy);
+
+      this.currentDragEl.style.position = 'relative';
+      this.currentDragEl.style.transform = `translate3d(${newX}px, ${newY}px, 0)`;
+
+      const moveId = this.currentDragEl.getAttribute('data-move-id');
+      this.elementPositions[moveId] = { x: newX, y: newY };
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (this.isDragging) {
+        this.isDragging = false;
+        if (this.currentDragEl) {
+          this.currentDragEl.classList.remove('is-dragging');
+          this.currentDragEl = null;
+        }
+        document.body.style.cursor = '';
+        localStorage.setItem('portfolio_element_positions', JSON.stringify(this.elementPositions));
+      }
+    });
+
     // Universal Click Interceptor for Edit Mode
     document.addEventListener('click', (e) => {
       if (!this.isEditing) return;
 
-      // Don't intercept clicks inside editor toolbar or modal
       if (e.target.closest('#editor-toolbar') || e.target.closest('#editor-img-modal') || e.target.closest('#editor-toggle-btn') || e.target.closest('#toast-container')) {
         return;
       }
 
-      // Check if user clicked an image or its overlay/container
+      // Check if clicking Move Handle
+      if (e.target.closest('.move-drag-handle')) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+
+      // Check if clicking an image
       const imgFrame = e.target.closest('.arch-img-frame, .project-img-frame, .arch-card-wrapper, .project-card, [data-img-container]');
       const directImg = e.target.closest('img[data-img-key]');
       const overlay = e.target.closest('.img-edit-overlay');
@@ -263,10 +426,9 @@ class PortfolioEditor {
         return;
       }
 
-      // Check if user clicked an editable text element or anchor
+      // Check if clicking editable text
       const editable = e.target.closest('[data-edit-key]');
       if (editable) {
-        // Prevent anchor navigation while editing
         const parentAnchor = e.target.closest('a');
         if (parentAnchor && !parentAnchor.classList.contains('editor-btn')) {
           e.preventDefault();
@@ -275,14 +437,13 @@ class PortfolioEditor {
         return;
       }
 
-      // Prevent regular links from navigating when in edit mode
       const anyAnchor = e.target.closest('a:not(.editor-btn)');
       if (anyAnchor) {
         e.preventDefault();
       }
     }, true);
 
-    // Auto-save text inputs in real-time on input/blur
+    // Auto-save text inputs in real-time
     document.addEventListener('input', (e) => {
       if (!this.isEditing) return;
       const editable = e.target.closest('[data-edit-key]');
@@ -304,7 +465,7 @@ class PortfolioEditor {
     }, true);
   }
 
-  // 5. Toggle visual edit mode
+  // 7. Toggle visual edit mode
   toggleEditMode(forceState = null) {
     this.isEditing = forceState !== null ? forceState : !this.isEditing;
     const body = document.body;
@@ -318,10 +479,11 @@ class PortfolioEditor {
       toggleBtn.classList.add('active');
       btnLabel.textContent = '✏️ Editing Active';
       this.enableContentEditable(true);
-      this.showToast('✏️ Edit Mode ON: Click any headline, text, or photo directly on the page to edit!');
+      this.showToast('✏️ Edit Mode ON: Click any text to type, or drag ✥ Move to reposition boxes!');
     } else {
       this.syncDOMToData();
       localStorage.setItem('custom_portfolio_data', JSON.stringify(window.portfolioData));
+      localStorage.setItem('portfolio_element_positions', JSON.stringify(this.elementPositions));
       body.classList.remove('editor-active');
       toolbar.classList.remove('open');
       toggleBtn.classList.remove('active');
@@ -331,7 +493,7 @@ class PortfolioEditor {
     }
   }
 
-  // 6. Enable/disable contenteditable on tagged text nodes
+  // 8. Enable/disable contenteditable on tagged text nodes
   enableContentEditable(enable) {
     const editables = document.querySelectorAll('[data-edit-key]');
     editables.forEach(el => {
@@ -345,7 +507,7 @@ class PortfolioEditor {
     });
   }
 
-  // 7. Sync DOM edits into memory window.portfolioData
+  // 9. Sync DOM edits into memory window.portfolioData
   syncDOMToData() {
     const editables = document.querySelectorAll('[data-edit-key]');
     editables.forEach(el => {
@@ -366,7 +528,7 @@ class PortfolioEditor {
     });
   }
 
-  // 8. Helper: set nested property using dot-path notation
+  // 10. Helper: set nested property using dot-path notation
   setNestedValue(obj, path, value) {
     if (!path || !obj) return;
     const keys = path.split('.');
@@ -385,7 +547,7 @@ class PortfolioEditor {
     current[lastKey] = value;
   }
 
-  // 9. Export updated configuration file (portfolio-data.js)
+  // 11. Export updated configuration file (portfolio-data.js)
   exportConfigFile() {
     const jsonString = JSON.stringify(window.portfolioData, null, 2);
     const fileContent = `/**
@@ -409,7 +571,7 @@ window.portfolioData = ${jsonString};
     this.showToast('📥 Downloaded updated portfolio-data.js!');
   }
 
-  // 10. Toast notification helper
+  // 12. Toast notification helper
   showToast(message) {
     let container = document.getElementById('toast-container');
     if (!container) {
