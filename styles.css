@@ -2048,3 +2048,238 @@ body.editor-active .project-card {
     justify-content: center;
   }
 }
+
+/* ==========================================================================
+   3D EXPERIENCE LAYER  (background canvas, panel fly-in, pointer tilt, glass,
+   and the admin Add / Delete controls). Everything here degrades to the flat
+   editorial layout under edit mode, reduced-motion, or when unsupported.
+   ========================================================================== */
+
+/* --- Decorative WebGL background canvas (scene3d.js) ---------------------- */
+/* Sits behind the ambient glows (z:-1) and all page content. When WebGL or
+   motion is unavailable the canvas stays empty & transparent and the CSS
+   glows remain as the visible fallback. */
+#bg-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -2;
+  pointer-events: none;
+  display: block;
+}
+
+/* --- Per-section perspective so each panel flies in on its own vanishing
+   point (perspective only affects DIRECT children, so it lives on <section>,
+   the parent of .panel-3d — never on <main>, whose grandchild it would miss).
+   Modals/toolbar/footer are OUTSIDE <main>, so their position:fixed is safe. */
+main section {
+  perspective: 1400px;
+  perspective-origin: 50% 42%;
+}
+
+/* The fly-in plane. stage3d.js sets inline translateZ()/rotateX()+opacity here
+   as the section leaves the viewport centre; identity (crisp & flat) when
+   centred. transform-style stays flat: the panel moves as one billboard, which
+   also keeps card backdrop-filter reliable (preserve-3d breaks it in places). */
+.panel-3d {
+  transform-style: flat;
+  transform-origin: center center;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
+/* --- Pointer tilt --------------------------------------------------------- */
+/* stage3d.js writes CSS vars --rx/--ry (never `transform`) on the card host;
+   the transform lives here on the inner layer, so the editor's inline
+   `style.transform` (drag-move) can never collide with the tilt. Identity when
+   the vars are 0deg (at rest), so text stays sharp. */
+.tilt-inner {
+  transform: perspective(820px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.tilt-inner.is-tilting {
+  will-change: transform;
+  transition-duration: 0.08s;
+}
+.arch-card-wrapper {
+  transform: perspective(820px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.arch-card-wrapper.is-tilting {
+  will-change: transform;
+  transition-duration: 0.08s;
+}
+
+/* Preserve the project card's internal flex layout now that its image + body
+   are wrapped in .tilt-inner (so the body still grows to equal card heights). */
+.project-card > .tilt-inner {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  height: 100%;
+}
+
+/* --- Glass surfaces (public view only) ------------------------------------ */
+/* Translucent cards let the depth scene read through, while text stays on an
+   82%-opaque plate for contrast. Falls back to the existing opaque card when
+   color-mix is unsupported. Blur is desktop-only to protect mobile scrolling. */
+@supports (background: color-mix(in srgb, white, black)) {
+  body:not(.editor-active) .project-card,
+  body:not(.editor-active) .about-card,
+  body:not(.editor-active) .skill-card,
+  body:not(.editor-active) .contact-card {
+    background-color: color-mix(in srgb, var(--bg-card) 82%, transparent);
+    border-color: color-mix(in srgb, var(--border-color) 75%, transparent);
+  }
+
+  @media (min-width: 761px) {
+    body:not(.editor-active) .project-card,
+    body:not(.editor-active) .about-card,
+    body:not(.editor-active) .skill-card,
+    body:not(.editor-active) .contact-card {
+      backdrop-filter: blur(7px) saturate(1.05);
+      -webkit-backdrop-filter: blur(7px) saturate(1.05);
+    }
+  }
+}
+
+/* --- Flatten everything for stable editing / reduced-motion / form focus --- */
+/* !important overrides the inline transform stage3d.js writes each frame. */
+body.editor-active .panel-3d,
+.panel-3d:focus-within {
+  transform: none !important;
+  opacity: 1 !important;
+}
+body.editor-active .tilt-inner,
+body.editor-active .arch-card-wrapper,
+.panel-3d:focus-within .tilt-inner,
+.panel-3d:focus-within .arch-card-wrapper {
+  transform: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel-3d {
+    transform: none !important;
+    opacity: 1 !important;
+  }
+  .tilt-inner,
+  .arch-card-wrapper {
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* ==========================================================================
+   ADMIN ADD / DELETE CONTROLS  (emitted by render.js, wired by editor.js).
+   Hidden entirely until the authenticated admin turns on Edit Mode.
+   ========================================================================== */
+.list-del-btn,
+.list-add-tile,
+.social-add-pill {
+  display: none;
+}
+
+/* Ensure the list hosts can anchor their absolutely-positioned delete badge. */
+body.editor-active .skill-card,
+body.editor-active .about-card,
+body.editor-active .social-pill,
+body.editor-active .circle-social-btn {
+  position: relative;
+}
+body.editor-active .social-pill,
+body.editor-active .circle-social-btn {
+  overflow: visible;
+}
+
+/* Delete badge — a small red "×" on the item's corner. */
+body.editor-active .list-del-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background-color: #c0392b;
+  color: #fff;
+  font-size: 1.15rem;
+  line-height: 1;
+  font-weight: 700;
+  cursor: pointer;
+  z-index: 60;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.32);
+  user-select: none;
+  transition: transform var(--transition-fast), background-color var(--transition-fast);
+}
+body.editor-active .list-del-btn:hover {
+  background-color: #e74c3c;
+  transform: scale(1.12);
+}
+/* Tighter badge that hugs the corner of the small social chips. */
+body.editor-active .social-pill .list-del-btn,
+body.editor-active .circle-social-btn .list-del-btn {
+  top: -8px;
+  right: -8px;
+  width: 20px;
+  height: 20px;
+  font-size: 0.9rem;
+  border-width: 1.5px;
+}
+
+/* "Add" tile — a dashed drop-zone that trails each card grid. */
+body.editor-active .list-add-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  width: 100%;
+  min-height: 130px;
+  padding: 1.5rem;
+  border: 2px dashed var(--border-focus);
+  border-radius: var(--radius-md);
+  background-color: var(--accent-light);
+  background-color: color-mix(in srgb, var(--accent-green) 8%, transparent);
+  color: var(--accent-green);
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: transform var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast);
+}
+body.editor-active .list-add-tile:hover {
+  transform: translateY(-3px);
+  border-color: var(--accent-green);
+  background-color: color-mix(in srgb, var(--accent-green) 16%, transparent);
+}
+.list-add-tile .add-plus {
+  font-size: 2rem;
+  line-height: 1;
+  font-weight: 400;
+}
+
+/* "Add link" pill — matches the social-chip language. */
+body.editor-active .social-add-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.5rem 0.95rem;
+  border: 1.5px dashed var(--border-focus);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--accent-green);
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: transform var(--transition-fast), background-color var(--transition-fast);
+}
+body.editor-active .social-add-pill:hover {
+  transform: translateY(-2px);
+  background-color: var(--accent-light);
+}

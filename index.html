@@ -38,6 +38,9 @@
   </script>
 </head>
 <body>
+  <!-- WebGL Background Scene (decorative; all real content lives in the editable HTML) -->
+  <canvas id="bg-canvas" aria-hidden="true"></canvas>
+
   <!-- Ambient Background Aura Glows -->
   <div class="ambient-glow glow-1" aria-hidden="true"></div>
   <div class="ambient-glow glow-2" aria-hidden="true"></div>
@@ -93,6 +96,7 @@
          SECTION 1: HERO SECTION (EDITABLE)
          ======================================================================= -->
     <section id="home" class="hero-section">
+      <div class="panel-3d">
       <div class="container hero-grid">
         <div class="hero-content">
           <div class="section-tag">
@@ -120,12 +124,14 @@
           </div>
         </div>
       </div>
+      </div>
     </section>
 
     <!-- =======================================================================
          SECTION 2: ABOUT ME SECTION (EDITABLE)
          ======================================================================= -->
     <section id="about" class="about-section">
+      <div class="panel-3d">
       <div class="container about-grid">
         <div class="about-visual">
           <div class="arch-card-wrapper about-arch">
@@ -196,12 +202,14 @@
           </div>
         </div>
       </div>
+      </div>
     </section>
 
     <!-- =======================================================================
          SECTION 3: CORE SKILLS SECTION (EDITABLE)
          ======================================================================= -->
     <section id="skills" class="skills-section">
+      <div class="panel-3d">
       <div class="container skills-grid">
         <div class="skills-content">
           <div class="section-tag">
@@ -266,12 +274,14 @@
           </div>
         </div>
       </div>
+      </div>
     </section>
 
     <!-- =======================================================================
          SECTION 4: SELECTED WORK / CASE STUDIES (EDITABLE)
          ======================================================================= -->
     <section id="projects" class="projects-section">
+      <div class="panel-3d">
       <div class="container">
         <div class="projects-header-grid">
           <div class="projects-header-left">
@@ -358,12 +368,14 @@
           </article>
         </div>
       </div>
+      </div>
     </section>
 
     <!-- =======================================================================
          SECTION 5: CONTACT / LET'S COLLABORATE (EDITABLE)
          ======================================================================= -->
     <section id="contact" class="contact-section">
+      <div class="panel-3d">
       <div class="container contact-grid">
         <div class="contact-left">
           <div class="section-tag">
@@ -434,6 +446,7 @@
             </form>
           </div>
         </div>
+      </div>
       </div>
     </section>
   </main>
@@ -557,7 +570,20 @@
   <div id="toast-container" class="toast-container" aria-live="polite"></div>
 
   <!-- Scripts -->
+  <!-- render.js runs first & synchronously so data-driven lists exist before hydration + editor bind -->
+  <script src="render.js"></script>
   <script src="script.js"></script>
+  <script src="stage3d.js"></script>
   <script src="editor.js"></script>
+
+  <!-- Three.js decorative background scene (ES module via import map) -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+    }
+  }
+  </script>
+  <script type="module" src="scene3d.js"></script>
 </body>
 </html>

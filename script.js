@@ -48,25 +48,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // Update About social links hrefs
-    if (data.about && Array.isArray(data.about.socialLinks)) {
-      const aboutLinks = document.querySelectorAll('#about-social-pills .social-pill');
-      aboutLinks.forEach((link, idx) => {
-        if (data.about.socialLinks[idx] && data.about.socialLinks[idx].url) {
-          link.href = data.about.socialLinks[idx].url;
-        }
-      });
-    }
-
-    // Update Contact social links hrefs
-    if (data.contact && Array.isArray(data.contact.socialLinks)) {
-      const contactLinks = document.querySelectorAll('.contact-social-row .circle-social-btn');
-      contactLinks.forEach((link, idx) => {
-        if (data.contact.socialLinks[idx] && data.contact.socialLinks[idx].url) {
-          link.href = data.contact.socialLinks[idx].url;
-        }
-      });
-    }
+    // Social link hrefs are emitted directly by render.js (the single source of
+    // truth for lists), so no index-based href patching is needed here.
   };
 
   renderPortfolio();
@@ -90,6 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
       const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
       document.documentElement.setAttribute('data-theme', newTheme);
+      document.dispatchEvent(new CustomEvent('portfolio:themechange', { detail: { theme: newTheme } }));
       localStorage.setItem('portfolio_theme', newTheme);
       if (window.portfolioEditor) {
         window.portfolioEditor.showToast(newTheme === 'dark' ? '🌙 Dark Mode Activated' : '☀️ Light Mode Activated');
@@ -168,19 +152,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
   animateElements.forEach(el => el.classList.add('fade-up'));
 
-  const observer = new IntersectionObserver(
-    (entries, obs) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('in-view');
-          obs.unobserve(entry.target);
-        }
-      });
-    },
-    { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
-  );
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(
+      (entries, obs) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in-view');
+            obs.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
+    );
 
-  animateElements.forEach(el => observer.observe(el));
+    animateElements.forEach(el => observer.observe(el));
+  } else {
+    // No IntersectionObserver: reveal everything so nothing is stuck hidden.
+    animateElements.forEach(el => el.classList.add('in-view'));
+  }
 
   // 6. Project Modal Handling
   const openModal = (projectKey) => {
@@ -228,16 +217,20 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.style.overflow = '';
   };
 
-  document.querySelectorAll('.project-card').forEach(card => {
-    card.addEventListener('click', (e) => {
-      // In edit mode, do NOT open view modal so user can edit cards directly
-      if (document.body.classList.contains('editor-active')) {
-        return;
-      }
-      const key = card.getAttribute('data-project');
-      openModal(key);
+  // Expose for other modules (belt-and-suspenders; delegation below handles clicks).
+  window.PortfolioApp = { openModal, closeModal };
+
+  // Delegate project-card clicks on the container so dynamically added cards work too.
+  const projectsContainer = document.getElementById('projects-list-container');
+  if (projectsContainer) {
+    projectsContainer.addEventListener('click', (e) => {
+      // In edit mode, do NOT open the view modal so the admin can edit cards directly.
+      if (document.body.classList.contains('editor-active')) return;
+      const card = e.target.closest('.project-card');
+      if (!card || !projectsContainer.contains(card)) return;
+      openModal(card.getAttribute('data-project'));
     });
-  });
+  }
 
   if (modalClose) {
     modalClose.addEventListener('click', closeModal);

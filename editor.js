@@ -79,6 +79,8 @@ class PortfolioEditor {
       body.classList.remove('editor-active');
       if (toolbar) toolbar.classList.remove('open');
       this.enableContentEditable(false);
+      this.isEditing = false;
+      document.dispatchEvent(new CustomEvent('portfolio:editmodechange', { detail: { editing: false } }));
     }
   }
 
@@ -192,6 +194,109 @@ class PortfolioEditor {
         el.style.position = 'relative';
       }
     });
+  }
+
+  // 6b. Re-bind interaction hooks after render.js rebuilds a list section.
+  //     Called by PortfolioRender.refresh() while edit mode is active. Every
+  //     step below is idempotent, so re-running it over fresh DOM is safe.
+  rehookAfterRender() {
+    this.enableContentEditable(this.isEditing);
+    this.setupDraggableContainers();
+    this.setupProjectEditButtons();
+    this.applySavedPositions();
+  }
+
+  // 6c. Map a list "type" → the portfolioData array that backs it.
+  getListArray(type) {
+    const d = window.portfolioData || {};
+    switch (type) {
+      case 'skills':         return (d.skills && d.skills.list) || null;
+      case 'projects':       return (d.projects && d.projects.list) || null;
+      case 'highlights':     return (d.about && d.about.highlights) || null;
+      case 'aboutSocials':   return (d.about && d.about.socialLinks) || null;
+      case 'contactSocials': return (d.contact && d.contact.socialLinks) || null;
+      default:               return null;
+    }
+  }
+
+  // 6d. ADD a new item to a list, then re-render that section from the array.
+  addListItem(type) {
+    if (!window.PortfolioRender) { this.showToast('⚠️ Renderer not ready.'); return; }
+    this.syncDOMToData(); // capture any un-blurred inline edits before re-render
+    const d = window.portfolioData;
+    const placeholder = window.PortfolioRender.PLACEHOLDER_IMG || '';
+
+    switch (type) {
+      case 'skills':
+        d.skills = d.skills || {}; d.skills.list = d.skills.list || [];
+        d.skills.list.push({ name: 'New Skill', description: 'Describe this skill…' });
+        break;
+      case 'projects':
+        d.projects = d.projects || {}; d.projects.list = d.projects.list || [];
+        d.projects.list.push({
+          id: 'project_' + this.uid(), title: 'New Project', role: 'ROLE',
+          iconType: 'analytics', image: placeholder,
+          summary: 'Short summary of this project…',
+          duration: '', technologies: '', details: ''
+        });
+        break;
+      case 'highlights':
+        d.about = d.about || {}; d.about.highlights = d.about.highlights || [];
+        d.about.highlights.push({
+          number: String(d.about.highlights.length + 1).padStart(2, '0'),
+          text: 'New highlight…'
+        });
+        break;
+      case 'aboutSocials':
+        d.about = d.about || {}; d.about.socialLinks = d.about.socialLinks || [];
+        d.about.socialLinks.push({ name: 'New Link', url: '#', iconType: 'link' });
+        break;
+      case 'contactSocials':
+        d.contact = d.contact || {}; d.contact.socialLinks = d.contact.socialLinks || [];
+        d.contact.socialLinks.push({ name: 'New Link', url: '#', iconType: 'link' });
+        break;
+      default: return;
+    }
+
+    window.PortfolioRender.refresh(type);
+    this.showToast('➕ Item added — edit it, then Save Changes.');
+  }
+
+  // 6e. DELETE a list item by index, prune its saved drag position, re-render.
+  deleteListItem(type, index) {
+    if (!window.PortfolioRender) { this.showToast('⚠️ Renderer not ready.'); return; }
+    if (isNaN(index)) return;
+    const arr = this.getListArray(type);
+    if (!Array.isArray(arr) || index < 0 || index >= arr.length) return;
+
+    this.syncDOMToData(); // capture any un-blurred inline edits before re-render
+    const removed = arr.splice(index, 1)[0];
+    this.pruneListPositions(type, removed);
+
+    window.PortfolioRender.refresh(type);
+    this.showToast('🗑️ Item deleted.');
+  }
+
+  // 6f. Drop drag-offsets orphaned by a delete. Skill/highlight positions are
+  //     index-keyed, so a delete shifts every following item — clear the whole
+  //     family. Project positions are id-keyed, so only the removed id goes.
+  pruneListPositions(type, removed) {
+    const P = this.elementPositions;
+    if (type === 'projects') {
+      if (removed && removed.id) delete P['move_project_' + removed.id];
+    } else if (type === 'skills') {
+      Object.keys(P).forEach(k => { if (k.indexOf('move_skill_') === 0) delete P[k]; });
+    } else if (type === 'highlights') {
+      Object.keys(P).forEach(k => { if (k.indexOf('move_highlight_') === 0) delete P[k]; });
+    }
+    try { localStorage.setItem('portfolio_element_positions', JSON.stringify(P)); } catch (e) {}
+  }
+
+  // Short unique id for new projects (monotonic within a session, no collisions
+  // when several are added inside the same millisecond).
+  uid() {
+    this._uidSeq = (this._uidSeq || 0) + 1;
+    return Date.now().toString(36) + '_' + this._uidSeq.toString(36);
   }
 
   // 7. Create Editor UI & Toolbar
@@ -652,22 +757,13 @@ class PortfolioEditor {
         p.technologies = document.getElementById('p-edit-tech').value.trim();
         p.details = document.getElementById('p-edit-details').value.trim();
 
-        // Update corresponding DOM card on screen
-        const cards = document.querySelectorAll('.project-card');
-        if (cards[idx]) {
-          const card = cards[idx];
-          const imgEl = card.querySelector('.project-img');
-          const roleEl = card.querySelector('.role-pill');
-          const titleEl = card.querySelector('.project-title');
-          const descEl = card.querySelector('.project-desc');
-
-          if (imgEl && p.image) imgEl.src = p.image;
-          if (roleEl) roleEl.textContent = p.role;
-          if (titleEl) titleEl.textContent = p.title;
-          if (descEl) descEl.textContent = p.summary;
+        // Re-render the projects list from data (single source of truth) so the
+        // on-screen card — and every data-edit-key index — stays in sync.
+        if (window.PortfolioRender) {
+          window.PortfolioRender.refresh('projects');
+        } else {
+          localStorage.setItem('custom_portfolio_data', JSON.stringify(window.portfolioData));
         }
-
-        localStorage.setItem('custom_portfolio_data', JSON.stringify(window.portfolioData));
         this.showToast('✅ Case Study Card updated successfully!');
         closePModal();
       }
@@ -769,7 +865,23 @@ class PortfolioEditor {
     document.addEventListener('click', (e) => {
       if (!this.isAdmin || !this.isEditing) return;
 
-      if (e.target.closest('#editor-toolbar') || 
+      // --- Add / Delete list-item controls (the admin add & remove capability) ---
+      const delBtn = e.target.closest('.list-del-btn');
+      if (delBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.deleteListItem(delBtn.getAttribute('data-del-type'), parseInt(delBtn.getAttribute('data-del-index'), 10));
+        return;
+      }
+      const addBtn = e.target.closest('.list-add-tile, .social-add-pill');
+      if (addBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.addListItem(addBtn.getAttribute('data-add-type'));
+        return;
+      }
+
+      if (e.target.closest('#editor-toolbar') ||
           e.target.closest('#editor-img-modal') || 
           e.target.closest('#editor-text-modal') || 
           e.target.closest('#editor-project-card-modal') || 
@@ -891,6 +1003,9 @@ class PortfolioEditor {
       this.enableContentEditable(false);
       this.showToast('👁️ Returned to Public Preview Mode');
     }
+
+    // Let the 3D staging flatten (edit) / resume (preview) in lock-step.
+    document.dispatchEvent(new CustomEvent('portfolio:editmodechange', { detail: { editing: this.isEditing } }));
   }
 
   // 12. Enable/disable contenteditable on tagged text nodes
