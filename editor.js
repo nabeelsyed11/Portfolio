@@ -1076,6 +1076,8 @@ class PortfolioEditor {
 
   // 15. Export updated configuration file (portfolio-data.js)
   exportConfigFile() {
+    const version = window.PORTFOLIO_DATA_VERSION
+      || (window.portfolioData && window.portfolioData.dataVersion) || 1;
     const jsonString = JSON.stringify(window.portfolioData, null, 2);
     const fileContent = `/**
  * ==============================================================================
@@ -1083,6 +1085,8 @@ class PortfolioEditor {
  * Generated via Live Visual Editor
  * ==============================================================================
  */
+
+window.PORTFOLIO_DATA_VERSION = ${version};
 
 window.portfolioData = ${jsonString};
 `;

@@ -11,7 +11,17 @@
  * ==============================================================================
  */
 
+// Bump this whenever you add or rename content below that must appear even for
+// visitors who previously used Edit Mode → Save (which stores a full copy of the
+// data in their own browser). On load, a saved copy stamped with an older version
+// is discarded so newly-added content always shows. Saved on-screen POSITIONS are
+// kept — they live in a separate localStorage key.
+window.PORTFOLIO_DATA_VERSION = 1;
+
 window.portfolioData = {
+  // Rides along with every saved copy so a stale copy can be detected on load.
+  dataVersion: window.PORTFOLIO_DATA_VERSION,
+
   // --- Brand & Navigation ---
   brand: {
     name: "Syed Nabeel Ahmed",
@@ -216,3 +226,24 @@ window.portfolioData = {
     bottomNote: "Designed for clarity, focus, and impact."
   }
 };
+
+// --- Version gate ------------------------------------------------------------
+// If a visitor saved an older copy of this data in their browser (Edit Mode →
+// Save), discard it whenever this file ships a newer PORTFOLIO_DATA_VERSION, so
+// freshly-added links/sections are never hidden behind their stale copy. The
+// loaders (render.js, script.js, editor.js) then read from this file. Saved
+// on-screen positions (a separate localStorage key) are left untouched.
+(function () {
+  try {
+    var saved = localStorage.getItem('custom_portfolio_data');
+    if (saved) {
+      var savedVersion = (JSON.parse(saved) || {}).dataVersion || 0;
+      if (savedVersion < window.PORTFOLIO_DATA_VERSION) {
+        localStorage.removeItem('custom_portfolio_data');
+      }
+    }
+  } catch (e) {
+    // Unreadable saved copy → remove it so the site always renders from here.
+    try { localStorage.removeItem('custom_portfolio_data'); } catch (e2) {}
+  }
+})();
