@@ -191,6 +191,11 @@ window.portfolioData = {
         name: "Instagram",
         url: "https://www.instagram.com/nabeelsyed_/",
         iconType: "instagram"
+      },
+      {
+        name: "WhatsApp",
+        url: "https://wa.me/917892967138?text=Hi%20Nabeel%2C%20I%20saw%20your%20portfolio%20and%20wanted%20to%20connect.",
+        iconType: "whatsapp"
       }
     ],
     form: {
