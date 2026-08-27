@@ -91,6 +91,79 @@
   }
 
   // --------------------------------------------------------------------------
+  // GITHUB HELPERS  (used by the Open Source section — parse, cache, format)
+  // --------------------------------------------------------------------------
+
+  /** "https://github.com/owner/repo(.git)(/)" → {owner,name,path} | null. */
+  function parseRepo(url) {
+    if (!url) return null;
+    const m = String(url).trim().match(/github\.com[/:]([^/\s]+)\/([^/#?\s]+)/i);
+    if (!m) return null;
+    const owner = m[1];
+    const name = m[2].replace(/\.git$/i, '');
+    if (!owner || !name) return null;
+    return { owner: owner, name: name, path: owner + '/' + name };
+  }
+
+  // GitHub's own language → dot-color map (common subset; grey fallback).
+  const LANG_COLORS = {
+    JavaScript: '#f1e05a', TypeScript: '#3178c6', HTML: '#e34c26', CSS: '#563d7c',
+    Python: '#3572A5', Java: '#b07219', 'C++': '#f34b7d', C: '#555555', 'C#': '#178600',
+    Go: '#00ADD8', Rust: '#dea584', PHP: '#4F5D95', Ruby: '#701516', Shell: '#89e051',
+    Swift: '#F05138', Kotlin: '#A97BFF', Dart: '#00B4AB', Vue: '#41b883',
+    'Jupyter Notebook': '#DA5B0B', SCSS: '#c6538c', Astro: '#ff5a03'
+  };
+  function langColor(lang) { return LANG_COLORS[lang] || '#8b98a5'; }
+
+  /** Compact "updated N ago" from an ISO timestamp ('' if unparseable). */
+  function timeAgo(iso) {
+    const then = Date.parse(iso);
+    if (isNaN(then)) return '';
+    const days = Math.floor(Math.max(0, (Date.now() - then) / 86400000));
+    if (days <= 0) return 'today';
+    if (days === 1) return 'yesterday';
+    if (days < 30) return days + ' days ago';
+    const months = Math.floor(days / 30);
+    if (months < 12) return months + (months === 1 ? ' month ago' : ' months ago');
+    const years = Math.floor(days / 365);
+    return years + (years === 1 ? ' year ago' : ' years ago');
+  }
+
+  // Live GitHub stats live OUTSIDE portfolioData (keeps Export clean) in their
+  // own localStorage cache, keyed by "owner/name", with a 6-hour TTL. This is
+  // read synchronously during render (instant, no flicker) and refreshed in the
+  // background by hydrateOpenSource().
+  const GH_CACHE_KEY = 'gh_repo_cache';
+  const GH_TTL = 6 * 60 * 60 * 1000;
+  function readGhCache() {
+    try { return JSON.parse(localStorage.getItem(GH_CACHE_KEY) || '{}') || {}; }
+    catch (e) { return {}; }
+  }
+  function writeGhCache(map) {
+    try { localStorage.setItem(GH_CACHE_KEY, JSON.stringify(map)); } catch (e) {}
+  }
+  function ghEntry(path) { return (path && readGhCache()[path]) || null; }
+
+  /** The meta row (language • stars • updated) from a cached record. */
+  function repoMetaHtml(rec) {
+    if (!rec) return '';
+    const parts = [];
+    if (rec.language) {
+      parts.push('<span class="repo-lang"><span class="lang-dot" style="background:' +
+        langColor(rec.language) + '"></span><span class="lang-name">' + esc(rec.language) +
+        '</span></span>');
+    }
+    if (typeof rec.stars === 'number') {
+      parts.push('<span class="repo-stars">★ <span>' + esc(rec.stars) + '</span></span>');
+    }
+    if (rec.pushed_at) {
+      const ago = timeAgo(rec.pushed_at);
+      if (ago) parts.push('<span class="repo-updated">Updated ' + esc(ago) + '</span>');
+    }
+    return parts.join('');
+  }
+
+  // --------------------------------------------------------------------------
   // RENDERERS  (each rebuilds one container's innerHTML from the data array)
   // --------------------------------------------------------------------------
 
@@ -184,12 +257,109 @@
     }).join('') + addPill('contactSocials', 'Add Link');
   }
 
+  function renderOpenSource() {
+    const c = document.getElementById('opensource-list-container');
+    if (!c) return;
+    const list = (D().openSource && D().openSource.list) || [];
+    c.innerHTML = list.map((r, i) => {
+      const id = r.id || `repo_${i}`;
+      const parsed = parseRepo(r.url);
+      const path = parsed ? parsed.path : '';
+      const rec = path ? ghEntry(path) : null;
+      // Display precedence: live cache → stored fallback → parsed-from-URL.
+      const name = (rec && rec.name) || (parsed && parsed.name) || 'repository';
+      const desc = (rec && rec.description) || r.description || 'No description provided yet.';
+      const url = r.url || '#';
+      return `
+      <article class="repo-card" data-move-id="move_repo_${esc(id)}" data-repo="${esc(path)}">
+        ${delControl('openSource', i)}
+        <div class="tilt-inner">
+          <div class="repo-top">
+            <span class="repo-icon">${socialSvg('github')}</span>
+            <h3 class="repo-name">${esc(name)}</h3>
+          </div>
+          <p class="repo-desc">${esc(desc)}</p>
+          <div class="repo-meta">${repoMetaHtml(rec)}</div>
+          <span class="repo-url-edit" data-edit-key="openSource.list.${i}.url" title="Repository URL (editable in Edit Mode)">${esc(url)}</span>
+          <a class="repo-link" href="${esc(url)}" target="_blank" rel="noopener noreferrer">View on GitHub →</a>
+        </div>
+      </article>`;
+    }).join('') + addTile('openSource', 'Add Repo');
+
+    // Refresh live stats in the background (cache-first; only fetches stale/missing).
+    setTimeout(hydrateOpenSource, 0);
+  }
+
+  /** Patch a single already-rendered card from a cached/fetched record. */
+  function patchRepoCard(card, rec) {
+    try {
+      if (!card || !rec) return;
+      const nameEl = card.querySelector('.repo-name');
+      if (nameEl && rec.name) nameEl.textContent = rec.name;
+      const descEl = card.querySelector('.repo-desc');
+      if (descEl && rec.description) descEl.textContent = rec.description;
+      const metaEl = card.querySelector('.repo-meta');
+      if (metaEl) metaEl.innerHTML = repoMetaHtml(rec);
+    } catch (e) { /* never let hydration break the page */ }
+  }
+
+  /**
+   * Fill each repo card's live stats from the GitHub REST API.
+   * Cache-first with a 6h TTL that throttles retries even on failure (so a
+   * rate-limited / offline visitor won't hammer the API). Fully defensive:
+   * any error just leaves the fallback text in place — never throws or logs.
+   */
+  function hydrateOpenSource() {
+    try {
+      const cards = document.querySelectorAll('#opensource-list-container .repo-card[data-repo]');
+      if (!cards.length) return;
+      const now = Date.now();
+      cards.forEach(function (card) {
+        const path = card.getAttribute('data-repo');
+        if (!path) return; // unparseable URL → leave placeholder
+        const cache = readGhCache();
+        const entry = cache[path];
+        if (entry && entry.fetchedAt && (now - entry.fetchedAt) < GH_TTL) {
+          patchRepoCard(card, entry); // recent (success or failure) → don't refetch
+          return;
+        }
+        fetch('https://api.github.com/repos/' + path, {
+          headers: { 'Accept': 'application/vnd.github+json' }
+        })
+          .then(function (res) {
+            if (!res.ok) throw new Error('github ' + res.status);
+            return res.json();
+          })
+          .then(function (data) {
+            const rec = {
+              name: data.name || '',
+              description: data.description || '',
+              language: data.language || '',
+              stars: typeof data.stargazers_count === 'number' ? data.stargazers_count : 0,
+              pushed_at: data.pushed_at || '',
+              fetchedAt: Date.now()
+            };
+            const c2 = readGhCache(); c2[path] = rec; writeGhCache(c2);
+            patchRepoCard(card, rec);
+          })
+          .catch(function () {
+            // Stamp the attempt so we back off for the full TTL; keep old data.
+            const c2 = readGhCache();
+            const prev = c2[path] || {};
+            prev.fetchedAt = Date.now();
+            c2[path] = prev; writeGhCache(c2);
+          });
+      });
+    } catch (e) { /* no-op */ }
+  }
+
   function renderAllLists() {
     renderSkills();
     renderProjects();
     renderHighlights();
     renderAboutSocials();
     renderContactSocials();
+    renderOpenSource();
   }
 
   // Map a "section" keyword to the renderer(s) it needs.
@@ -199,6 +369,7 @@
     highlights: [renderHighlights],
     aboutSocials: [renderAboutSocials],
     contactSocials: [renderContactSocials],
+    openSource: [renderOpenSource],
     all: [renderAllLists]
   };
 
@@ -231,6 +402,7 @@
     renderHighlights,
     renderAboutSocials,
     renderContactSocials,
+    renderOpenSource,
     refresh,
     PLACEHOLDER_IMG
   };

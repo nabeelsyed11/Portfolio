@@ -269,16 +269,62 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
+      const notify = (msg) => window.portfolioEditor
+        ? window.portfolioEditor.showToast(msg)
+        : alert(msg);
+
+      const name = nameInput.value.trim();
+      const email = emailInput.value.trim();
+      const message = messageInput.value.trim();
+
+      // Web3Forms emails each submission straight to your inbox — but only once a
+      // real access key is set in index.html. We check whether that key is a valid
+      // UUID; if it's still the placeholder, we fall back to opening the visitor's
+      // own email client addressed to you, so a message is NEVER silently lost.
+      // Paste your real key into index.html and this fallback is skipped automatically.
+      const FALLBACK_EMAIL = 'nabeelahmedna7860@gmail.com';
+      const accessKey = ((contactForm.querySelector('input[name="access_key"]') || {}).value || '').trim();
+      const keyIsReal = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(accessKey);
+
+      if (!keyIsReal) {
+        // No Web3Forms key yet → hand the message off to the visitor's email app.
+        const subject = `Portfolio contact from ${name}`;
+        const body = `Name: ${name}\nEmail: ${email}\n\n${message}`;
+        window.location.href =
+          `mailto:${FALLBACK_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        notify(`📧 Opening your email app — or write to me directly at ${FALLBACK_EMAIL}`);
+        return;
+      }
+
       const originalText = submitBtn.innerHTML;
       submitBtn.disabled = true;
       submitBtn.innerHTML = `<span>Sending...</span>`;
 
-      setTimeout(() => {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = originalText;
-        contactForm.reset();
-        window.portfolioEditor ? window.portfolioEditor.showToast('✅ Thank you! Your message has been sent.') : alert('Thank you! Your message has been sent.');
-      }, 700);
+      // Handle the response in-page so the visitor keeps the success animation
+      // instead of being redirected away to the Web3Forms confirmation page.
+      fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Accept': 'application/json' },
+        body: new FormData(contactForm)
+      })
+        .then((res) => res.json().catch(() => ({})))
+        .then((data) => {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalText;
+          if (data && data.success) {
+            contactForm.reset();
+            notify('✅ Thank you! Your message has been sent.');
+          } else {
+            notify('⚠️ Sorry, your message could not be sent. Please email me directly.');
+            console.error('[contact] Web3Forms rejected the submission:', data);
+          }
+        })
+        .catch((err) => {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalText;
+          notify('⚠️ Network error — please check your connection or email me directly.');
+          console.error('[contact] submission failed:', err);
+        });
     });
   }
 });

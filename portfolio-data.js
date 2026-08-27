@@ -141,6 +141,26 @@ window.portfolioData = {
     ]
   },
 
+  // --- Open Source / GitHub Repositories Section ---
+  // Curate which repos appear by adding/removing entries here (or via the live
+  // Edit Mode "＋ Add Repo" tile). Each card auto-fills its name, description,
+  // language, ⭐ stars and last-updated LIVE from the GitHub API — the fields
+  // below are only fallbacks used when GitHub is unreachable. `url` is the one
+  // field you set; everything else comes from GitHub.
+  openSource: {
+    tag: "OPEN SOURCE",
+    title: "Building in the open.",
+    description: "Straight from my GitHub — stars, language, and latest activity update themselves.",
+    username: "nabeelsyed11",
+    list: [
+      {
+        id: "repo_seed",
+        url: "https://github.com/nabeelsyed11/Portfolio",
+        description: "A 3D, admin-editable personal portfolio built with vanilla HTML, CSS & JavaScript."
+      }
+    ]
+  },
+
   // --- Contact / Opportunities Section ---
   contact: {
     tag: "LET'S COLLABORATE",

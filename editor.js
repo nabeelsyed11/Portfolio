@@ -127,6 +127,7 @@ class PortfolioEditor {
       '.skills-visual',
       '.skill-card',
       '.project-card',
+      '.repo-card',
       '.contact-left',
       '.contact-card'
     ];
@@ -215,6 +216,7 @@ class PortfolioEditor {
       case 'highlights':     return (d.about && d.about.highlights) || null;
       case 'aboutSocials':   return (d.about && d.about.socialLinks) || null;
       case 'contactSocials': return (d.contact && d.contact.socialLinks) || null;
+      case 'openSource':     return (d.openSource && d.openSource.list) || null;
       default:               return null;
     }
   }
@@ -255,6 +257,14 @@ class PortfolioEditor {
         d.contact = d.contact || {}; d.contact.socialLinks = d.contact.socialLinks || [];
         d.contact.socialLinks.push({ name: 'New Link', url: '#', iconType: 'link' });
         break;
+      case 'openSource':
+        d.openSource = d.openSource || {}; d.openSource.list = d.openSource.list || [];
+        d.openSource.list.push({
+          id: 'repo_' + this.uid(),
+          url: 'https://github.com/' + ((d.openSource && d.openSource.username) || 'nabeelsyed11') + '/',
+          description: ''
+        });
+        break;
       default: return;
     }
 
@@ -288,6 +298,8 @@ class PortfolioEditor {
       Object.keys(P).forEach(k => { if (k.indexOf('move_skill_') === 0) delete P[k]; });
     } else if (type === 'highlights') {
       Object.keys(P).forEach(k => { if (k.indexOf('move_highlight_') === 0) delete P[k]; });
+    } else if (type === 'openSource') {
+      if (removed && removed.id) delete P['move_repo_' + removed.id];
     }
     try { localStorage.setItem('portfolio_element_positions', JSON.stringify(P)); } catch (e) {}
   }

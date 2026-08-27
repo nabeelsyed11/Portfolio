@@ -2128,6 +2128,7 @@ main section {
   body:not(.editor-active) .project-card,
   body:not(.editor-active) .about-card,
   body:not(.editor-active) .skill-card,
+  body:not(.editor-active) .repo-card,
   body:not(.editor-active) .contact-card {
     background-color: color-mix(in srgb, var(--bg-card) 82%, transparent);
     border-color: color-mix(in srgb, var(--border-color) 75%, transparent);
@@ -2137,6 +2138,7 @@ main section {
     body:not(.editor-active) .project-card,
     body:not(.editor-active) .about-card,
     body:not(.editor-active) .skill-card,
+    body:not(.editor-active) .repo-card,
     body:not(.editor-active) .contact-card {
       backdrop-filter: blur(7px) saturate(1.05);
       -webkit-backdrop-filter: blur(7px) saturate(1.05);
@@ -2281,5 +2283,161 @@ body.editor-active .social-add-pill {
 }
 body.editor-active .social-add-pill:hover {
   transform: translateY(-2px);
+  background-color: var(--accent-light);
+}
+
+/* ==========================================================================
+   OPEN SOURCE — live GitHub repo cards
+   Rendered by render.js and hydrated by hydrateOpenSource(). Reuses the card /
+   glass / tilt / control system; only `url` is admin-editable (shown in Edit
+   Mode), everything else fills in live from the GitHub API.
+   ========================================================================== */
+.opensource-subtext {
+  font-size: 1.05rem;
+  color: var(--text-body);
+  line-height: 1.65;
+  max-width: 620px;
+  margin-bottom: 2.75rem;
+}
+
+.repo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.75rem;
+}
+/* Responsive collapses live here (not in the earlier media-query blocks) so
+   they always follow the base rule in source order and reliably win. */
+@media (max-width: 1024px) {
+  .repo-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+  .repo-grid { grid-template-columns: 1fr; }
+}
+
+.repo-card {
+  position: relative; /* anchors the Edit-Mode delete badge */
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  padding: 1.6rem 1.5rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  transition: transform var(--transition-smooth), box-shadow var(--transition-smooth), border-color var(--transition-fast);
+}
+.repo-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-lg);
+  border-color: rgba(99, 140, 110, 0.4);
+}
+.repo-card > .tilt-inner {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  height: 100%;
+  gap: 0.7rem;
+}
+
+.repo-top {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.repo-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--text-heading);
+}
+.repo-icon svg {
+  width: 22px;
+  height: 22px;
+}
+.repo-name {
+  font-family: var(--font-serif);
+  font-size: 1.3rem;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--text-heading);
+  word-break: break-word;
+}
+
+.repo-desc {
+  flex: 1 1 auto;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--text-body);
+}
+
+.repo-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.1rem;
+  min-height: 1rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+.repo-lang {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.lang-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--accent-green);
+  display: inline-block;
+  flex-shrink: 0;
+}
+.repo-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--accent-green);
+}
+.repo-stars span {
+  font-weight: 700;
+  color: var(--text-body);
+}
+.repo-updated {
+  color: var(--text-muted);
+}
+
+.repo-link {
+  margin-top: auto;
+  align-self: flex-start;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--accent-green);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+.repo-link:hover {
+  text-decoration: underline;
+}
+
+/* No-JS fallback link (render.js replaces the container's contents). */
+.repo-fallback-link {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  color: var(--accent-green);
+  text-decoration: none;
+}
+
+/* Editable repo URL — hidden in public view, shown only while editing. */
+.repo-url-edit {
+  display: none;
+}
+body.editor-active .repo-url-edit {
+  display: block;
+  font-family: var(--font-mono, ui-monospace, 'SFMono-Regular', Menlo, monospace);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  word-break: break-all;
+  padding: 0.4rem 0.55rem;
+  border: 1px dashed var(--border-focus);
+  border-radius: var(--radius-sm);
   background-color: var(--accent-light);
 }

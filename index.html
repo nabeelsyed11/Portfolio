@@ -61,7 +61,8 @@
         <a href="#about" class="nav-link">About</a>
         <a href="#skills" class="nav-link">Skills</a>
         <a href="#projects" class="nav-link">Projects</a>
-        
+        <a href="#opensource" class="nav-link">Open Source</a>
+
         <!-- Theme Toggle Button -->
         <button class="theme-toggle-btn" id="theme-toggle" aria-label="Toggle theme" title="Toggle dark / light mode">
           <svg class="sun-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -372,6 +373,33 @@
     </section>
 
     <!-- =======================================================================
+         SECTION 4B: OPEN SOURCE / GITHUB REPOSITORIES (EDITABLE, LIVE STATS)
+         Cards are rendered from window.portfolioData.openSource.list by
+         render.js, then hydrated with live name / description / language / ⭐
+         stars / last-updated from the GitHub API (cached 6h in localStorage).
+         Add or remove repos via Edit Mode's "＋ Add Repo" tile.
+         ======================================================================= -->
+    <section id="opensource" class="opensource-section">
+      <div class="panel-3d">
+      <div class="container">
+        <div class="section-tag">
+          <span class="tag-line"></span>
+          <span class="tag-text" data-edit-key="openSource.tag">OPEN SOURCE</span>
+        </div>
+        <h2 class="section-title" data-edit-key="openSource.title">Building in the open.</h2>
+        <p class="opensource-subtext" data-edit-key="openSource.description">
+          Straight from my GitHub — stars, language, and latest activity update themselves.
+        </p>
+
+        <div class="repo-grid" id="opensource-list-container">
+          <!-- Populated by render.js. This static link is the no-JS fallback: -->
+          <a class="repo-fallback-link" href="https://github.com/nabeelsyed11" target="_blank" rel="noopener noreferrer">View my GitHub →</a>
+        </div>
+      </div>
+      </div>
+    </section>
+
+    <!-- =======================================================================
          SECTION 5: CONTACT / LET'S COLLABORATE (EDITABLE)
          ======================================================================= -->
     <section id="contact" class="contact-section">
@@ -424,6 +452,23 @@
         <div class="contact-right">
           <div class="contact-card">
             <form id="contact-form" class="contact-form" novalidate>
+              <!-- ============================================================
+                   WEB3FORMS SETUP  — this is how contact messages reach your inbox.
+                   Replace the access_key value below with the key Web3Forms emails
+                   you (get one free in ~1 min at https://web3forms.com — just enter
+                   your email address). The key is SAFE to keep in public HTML: it
+                   only lets this form send to YOUR verified email, nothing else.
+                   Until you paste a real UUID key here, the form falls back to
+                   opening the visitor's email app addressed to you (see the
+                   FALLBACK_EMAIL in script.js) — so a message is NEVER silently
+                   lost. Add the key and that fallback is skipped automatically.
+                   ============================================================ -->
+              <input type="hidden" name="access_key" value="YOUR_WEB3FORMS_ACCESS_KEY_HERE">
+              <input type="hidden" name="subject" value="New message from your portfolio contact form">
+              <input type="hidden" name="from_name" value="Portfolio Website">
+              <!-- Spam honeypot: bots fill this hidden field, humans never see it. -->
+              <input type="checkbox" name="botcheck" tabindex="-1" aria-hidden="true" style="display:none !important">
+
               <div class="form-row">
                 <div class="form-group">
                   <label for="name" class="form-label">NAME</label>
@@ -477,6 +522,7 @@
           <li><a href="#about" class="footer-nav-link">About Me</a></li>
           <li><a href="#skills" class="footer-nav-link">Expertise &amp; Skills</a></li>
           <li><a href="#projects" class="footer-nav-link">Selected Projects</a></li>
+          <li><a href="#opensource" class="footer-nav-link">Open Source</a></li>
           <li><a href="#contact" class="footer-nav-link">Let's Connect</a></li>
         </ul>
       </div>

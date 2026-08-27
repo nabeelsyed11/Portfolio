@@ -34,7 +34,7 @@
   let editing = false;
   let currentTiltHost = null;
 
-  const TILT_SEL = '.project-card, .skill-card, .about-card, .arch-card-wrapper';
+  const TILT_SEL = '.project-card, .skill-card, .about-card, .repo-card, .arch-card-wrapper';
 
   const motionOff = () => reduceMQ.matches || editing;
 
