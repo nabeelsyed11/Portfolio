@@ -267,9 +267,13 @@
       const parsed = parseRepo(r.url);
       const path = parsed ? parsed.path : '';
       const rec = path ? ghEntry(path) : null;
-      // Display precedence: live cache → stored fallback → parsed-from-URL.
+      // A manual description (typed in Edit Mode) always wins, so the admin can
+      // describe repos GitHub has no description for — or override GitHub's text.
+      // Leave it blank to auto-use GitHub's live description.
+      const manualDesc = (r.description && r.description.trim()) ? r.description.trim() : '';
       const name = (rec && rec.name) || (parsed && parsed.name) || 'repository';
-      const desc = (rec && rec.description) || r.description || 'No description provided yet.';
+      // Display precedence: manual → live GitHub → placeholder.
+      const desc = manualDesc || (rec && rec.description) || 'No description provided yet.';
       const url = r.url || '#';
       return `
       <article class="repo-card" data-move-id="move_repo_${esc(id)}" data-repo="${esc(path)}">
@@ -279,9 +283,12 @@
             <span class="repo-icon">${socialSvg('github')}</span>
             <h3 class="repo-name">${esc(name)}</h3>
           </div>
-          <p class="repo-desc">${esc(desc)}</p>
+          <p class="repo-desc"${manualDesc ? ' data-manual="1"' : ''}>${esc(desc)}</p>
           <div class="repo-meta">${repoMetaHtml(rec)}</div>
+          <span class="repo-edit-label">Repository URL</span>
           <span class="repo-url-edit" data-edit-key="openSource.list.${i}.url" title="Repository URL (editable in Edit Mode)">${esc(url)}</span>
+          <span class="repo-edit-label">Description (optional — overrides GitHub)</span>
+          <span class="repo-desc-edit" data-edit-key="openSource.list.${i}.description" data-placeholder="Add a description… (blank = use GitHub's)">${esc(r.description || '')}</span>
           <a class="repo-link" href="${esc(url)}" target="_blank" rel="noopener noreferrer">View on GitHub →</a>
         </div>
       </article>`;
@@ -298,7 +305,11 @@
       const nameEl = card.querySelector('.repo-name');
       if (nameEl && rec.name) nameEl.textContent = rec.name;
       const descEl = card.querySelector('.repo-desc');
-      if (descEl && rec.description) descEl.textContent = rec.description;
+      // A manual description (data-manual) is authoritative — never overwrite it
+      // with GitHub's. Otherwise fill in GitHub's live description when it has one.
+      if (descEl && rec.description && !descEl.hasAttribute('data-manual')) {
+        descEl.textContent = rec.description;
+      }
       const metaEl = card.querySelector('.repo-meta');
       if (metaEl) metaEl.innerHTML = repoMetaHtml(rec);
     } catch (e) { /* never let hydration break the page */ }

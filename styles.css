@@ -2441,3 +2441,38 @@ body.editor-active .repo-url-edit {
   border-radius: var(--radius-sm);
   background-color: var(--accent-light);
 }
+
+/* Editable manual description + field labels — hidden in public view, shown only
+   while editing (mirrors .repo-url-edit). The manual description overrides GitHub's;
+   leave it blank to auto-use GitHub's live description. */
+.repo-desc-edit,
+.repo-edit-label {
+  display: none;
+}
+body.editor-active .repo-desc-edit {
+  display: block;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--text-body);
+  word-break: break-word;
+  padding: 0.4rem 0.55rem;
+  border: 1px dashed var(--border-focus);
+  border-radius: var(--radius-sm);
+  background-color: var(--accent-light);
+  min-height: 1.2em;
+}
+body.editor-active .repo-desc-edit:empty::before {
+  content: attr(data-placeholder);
+  color: var(--text-muted);
+  opacity: 0.75;
+}
+body.editor-active .repo-edit-label {
+  display: block;
+  margin-top: 0.5rem;
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
