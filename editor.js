@@ -963,6 +963,18 @@ class PortfolioEditor {
       if (editable) {
         this.syncDOMToData();
         localStorage.setItem('custom_portfolio_data', JSON.stringify(window.portfolioData));
+
+        // A repo card's URL is the single field that drives its live GitHub data
+        // (name, description, language, ⭐ stars, last-updated). When it changes,
+        // re-render the Open Source section so the card's data-repo is rebuilt from
+        // the new URL and hydrateOpenSource() re-fetches from the GitHub API. Without
+        // this, an edited URL is saved but the card keeps the stale (often empty)
+        // data-repo it was first rendered with, so it never hydrates. Deferred to a
+        // timeout so the click that moved focus away finishes first. No reload needed.
+        const key = editable.getAttribute('data-edit-key') || '';
+        if (/^openSource\.list\.\d+\.url$/.test(key) && window.PortfolioRender) {
+          setTimeout(() => window.PortfolioRender.refresh('openSource'), 0);
+        }
       }
     }, true);
   }
