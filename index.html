@@ -18,11 +18,17 @@
   <!-- Portfolio Configuration Data -->
   <script src="portfolio-data.js"></script>
 
-  <!-- Firebase SDK (App, Auth & Analytics) -->
+  <!-- Firebase SDK (App, Auth, Analytics & Firestore) -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script src="firebase-config.js"></script>
+
+  <!-- Cross-device content sync: publishes admin edits to a shared Firestore
+       doc so they appear on every device (not just the browser they were made
+       in). Degrades silently to local-only if Firestore is unavailable. -->
+  <script src="portfolio-sync.js"></script>
 
   <!-- Immediate Theme Initialization Script -->
   <script>

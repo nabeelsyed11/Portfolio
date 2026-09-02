@@ -637,6 +637,31 @@ class PortfolioEditor {
       });
     }
 
+    // Google Sign-In — the only way to PUBLISH to all devices (creates a real
+    // Firebase identity that Firestore's write rules check). The passcode still
+    // unlocks local editing, but cloud writes need this.
+    if (btnGoogle) {
+      btnGoogle.addEventListener('click', async () => {
+        try {
+          if (adminErr) adminErr.style.display = 'none';
+          if (!window.firebaseAuthManager || typeof window.firebaseAuthManager.signInWithGoogle !== 'function') {
+            throw new Error('Google sign-in is unavailable. Use the Admin Passcode instead.');
+          }
+          await window.firebaseAuthManager.signInWithGoogle();
+          // onAuthStateChanged also flips admin access; do it here for immediacy.
+          this.setAdminAccess(true);
+          this.closeAdminModal();
+          this.toggleEditMode(true);
+          this.showToast('👑 Signed in with Google — you can now publish to all devices!');
+        } catch (err) {
+          if (adminErr) {
+            adminErr.textContent = (err && err.message) || 'Google sign-in failed.';
+            adminErr.style.display = 'block';
+          }
+        }
+      });
+    }
+
     // Lock / Logout Admin
     if (lockBtn) {
       lockBtn.addEventListener('click', async () => {
@@ -655,9 +680,42 @@ class PortfolioEditor {
 
     saveBtn.addEventListener('click', () => {
       this.syncDOMToData();
+      // Always save locally first — this can never fail and is never at risk,
+      // whatever happens with the cloud publish below.
       localStorage.setItem('custom_portfolio_data', JSON.stringify(window.portfolioData));
       localStorage.setItem('portfolio_element_positions', JSON.stringify(this.elementPositions));
-      this.showToast('✅ All text edits, photos, and moved layout positions saved!');
+
+      // Then try to PUBLISH to every device via Firestore. Requires a Google
+      // admin session (rules lock writes to the owner); passcode-only sessions
+      // stay local with a clear prompt. Layout positions are intentionally NOT
+      // published — they're a per-device preference.
+      if (window.PortfolioSync && typeof window.PortfolioSync.save === 'function') {
+        this.showToast('✅ Saved on this device — publishing to all devices…');
+        window.PortfolioSync.save(window.portfolioData)
+          .then((res) => {
+            if (res && res.stripped) {
+              this.showToast('🌍 Published to all devices! (Uploaded photos were too large to sync — set photos by URL to share them across devices.)');
+            } else {
+              this.showToast('🌍 Published! Your changes now appear on every device.');
+            }
+          })
+          .catch((err) => {
+            const code = err && err.message;
+            if (code === 'not-authenticated') {
+              this.showToast('✅ Saved on this device. To publish to ALL devices: open Admin Login → “Sign in with Google”, then Save again.');
+            } else if (code === 'too-large') {
+              this.showToast('✅ Saved on this device. Too large to publish (usually big uploaded photos) — set photos by URL instead.');
+            } else if (code === 'sync-unavailable') {
+              this.showToast('✅ Saved on this device. Cloud sync is unavailable right now.');
+            } else if (code === 'publish-timeout') {
+              this.showToast('✅ Saved on this device. Couldn’t reach the cloud to publish — check your connection (and that Firestore is enabled), then Save again.');
+            } else {
+              this.showToast('✅ Saved on this device. Could not publish to the cloud — check your connection and Firestore setup.');
+            }
+          });
+      } else {
+        this.showToast('✅ All text edits, photos, and moved layout positions saved!');
+      }
     });
 
     resetLayoutBtn.addEventListener('click', () => {
