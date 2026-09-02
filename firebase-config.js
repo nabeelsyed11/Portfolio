@@ -12,13 +12,13 @@
  */
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCVazu2cs9defvCU8BbKaUcS9ffDD7xkg8",
-  authDomain: "portfolio-911b8.firebaseapp.com",
-  projectId: "portfolio-911b8",
-  storageBucket: "portfolio-911b8.firebasestorage.app",
-  messagingSenderId: "454387629769",
-  appId: "1:454387629769:web:549b0ff567364c5a235718",
-  measurementId: "G-8B5EGSTKBN"
+  apiKey: "AIzaSyDjVr7wYoff9QxusYF5_NX49wY8wxbTk7U",
+  authDomain: "portfolio-1d97f.firebaseapp.com",
+  projectId: "portfolio-1d97f",
+  storageBucket: "portfolio-1d97f.firebasestorage.app",
+  messagingSenderId: "299635279591",
+  appId: "1:299635279591:web:bb0feb1206295c1bd34442",
+  measurementId: "G-5EX55RGLCC"
 };
 
 // Authorized Admin Emails (Verified via Google OAuth)
